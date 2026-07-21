@@ -1,0 +1,22 @@
+project:
+  type: website
+  output-dir: _site
+
+website:
+  title: "European Trade Network"
+  navbar:
+    left:
+      - href: index.qmd
+        text: Overview
+
+format:
+  html:
+    theme: cosmo
+    toc: true
+    code-fold: true
+    fig-width: 9
+    fig-height: 6
+
+execute:
+  freeze: auto
+  warning: false

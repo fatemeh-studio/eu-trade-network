@@ -1,0 +1,41 @@
+---
+title: "European Trade Network"
+subtitle: "Centrality, communities, and resilience — CEPII BACI"
+author: "Fatemeh"
+date: today
+---
+
+## Overview
+
+Countries as nodes, directed weighted trade flows as edges. Three questions: who is
+central (and where does Austria sit), which trade communities emerge, and how resilient
+is the network to losing its hubs.
+
+> This report is generated from the analysis notebooks. Fill each section from the
+> notebook outputs once they are built (Prompt 7).
+
+## Data & method
+
+- Source: CEPII BACI, HS17, year `{FILL}`. Nodes: EU-27 + `{FILL}` partners.
+- Directed weighted graph (NetworkX) · DuckDB storage · disparity-filter backbone ·
+  Louvain communities · targeted-vs-random resilience.
+
+## RQ1 — Centrality and hubs
+
+`{FILL: flow map + centrality table + Austria's rank}`
+
+## RQ2 — Trade communities
+
+`{FILL: backbone + Louvain map + modularity}`
+
+## RQ3 — Resilience
+
+`{FILL: targeted vs random curves + critical threshold}`
+
+## RQ4 — Energy subnetwork (optional)
+
+`{FILL: HS-27 vs total}`
+
+## Takeaways
+
+`{FILL: 3 bullet points}`

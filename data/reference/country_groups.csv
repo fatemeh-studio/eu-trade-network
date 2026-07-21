@@ -1,0 +1,36 @@
+iso3,name,group
+AUT,Austria,EU
+BEL,Belgium,EU
+BGR,Bulgaria,EU
+HRV,Croatia,EU
+CYP,Cyprus,EU
+CZE,Czechia,EU
+DNK,Denmark,EU
+EST,Estonia,EU
+FIN,Finland,EU
+FRA,France,EU
+DEU,Germany,EU
+GRC,Greece,EU
+HUN,Hungary,EU
+IRL,Ireland,EU
+ITA,Italy,EU
+LVA,Latvia,EU
+LTU,Lithuania,EU
+LUX,Luxembourg,EU
+MLT,Malta,EU
+NLD,Netherlands,EU
+POL,Poland,EU
+PRT,Portugal,EU
+ROU,Romania,EU
+SVK,Slovakia,EU
+SVN,Slovenia,EU
+ESP,Spain,EU
+SWE,Sweden,EU
+GBR,United Kingdom,Partner
+CHE,Switzerland,Partner
+NOR,Norway,Partner
+USA,United States,Partner
+CHN,China,Partner
+TUR,Turkey,Partner
+RUS,Russia,Partner
+JPN,Japan,Partner

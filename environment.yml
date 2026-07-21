@@ -1,0 +1,27 @@
+name: eu-trade-network
+channels:
+  - conda-forge
+dependencies:
+  - python=3.11
+  - pandas
+  - numpy
+  - scipy
+  - networkx
+  - python-louvain
+  - duckdb
+  - plotly
+  - matplotlib
+  - python-kaleido        # static PNG export for plotly
+  - jupyterlab
+  - ipykernel
+  - pip
+  - pip:
+      - pyvis
+      - ruff
+      - basedpyright
+      - nbstripout
+      - pre-commit
+      - pytest
+      - python-dotenv
+# NOTE: Quarto is a separate CLI. Install once from https://quarto.org/docs/get-started/
+#       (or `conda install -c conda-forge quarto`). It is not a Python package.

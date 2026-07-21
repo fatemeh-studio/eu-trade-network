@@ -1,0 +1,28 @@
+# Data (fetched / built locally, never committed)
+data/raw/
+data/processed/
+data/external/
+*.duckdb
+*.duckdb.wal
+
+# Secrets
+.env
+
+# QA / scratch figures
+figures/qa/
+
+# Quarto
+/_site/
+/.quarto/
+*_files/
+
+# Python
+__pycache__/
+*.py[cod]
+.ipynb_checkpoints/
+*.egg-info/
+build/
+dist/
+.pytest_cache/
+.ruff_cache/
+.venv/

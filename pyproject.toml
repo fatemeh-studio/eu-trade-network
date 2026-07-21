@@ -1,0 +1,48 @@
+[build-system]
+requires = ["setuptools>=68", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "eu-trade-network"
+version = "0.1.0"
+description = "Complex-systems analysis of the European trade network: centrality, communities, and resilience."
+readme = "README.md"
+requires-python = ">=3.11"
+authors = [{ name = "Fatemeh" }]
+license = { text = "MIT" }
+dependencies = [
+    "pandas",
+    "numpy",
+    "scipy",
+    "networkx",
+    "python-louvain",
+    "duckdb",
+    "plotly",
+    "kaleido",
+    "pyvis",
+    "python-dotenv",
+]
+
+[project.optional-dependencies]
+dev = ["ruff", "basedpyright", "pytest", "nbstripout", "pre-commit"]
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.ruff]
+line-length = 100
+target-version = "py311"
+src = ["src", "tests"]
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "UP", "B", "SIM", "PD"]
+ignore = ["E501"]
+
+[tool.basedpyright]
+include = ["src", "tests"]
+typeCheckingMode = "standard"
+reportMissingTypeStubs = false
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+addopts = "-q"

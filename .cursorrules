@@ -1,0 +1,4 @@
+Follow the rules in AGENTS.md at the repository root. Read it before making any change.
+Key points: conda env `eu-trade-network`; all reusable logic lives in src/eu_trade_network;
+notebooks orchestrate + visualise only; ruff + basedpyright + pytest must pass before a task
+is "done"; never commit data/ or .env; conventional commit messages.

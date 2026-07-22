@@ -3,7 +3,6 @@
 > Complex-systems analysis of European merchandise trade — **centrality**, **trade
 > communities**, and **network resilience** — built from CEPII BACI open data.
 
-<!-- HERO: replace with figures/headline/01_flow_map.png once notebook 01 is run -->
 ![Trade flow map](figures/headline/01_flow_map.png)
 
 ## The question

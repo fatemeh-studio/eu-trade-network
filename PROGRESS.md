@@ -4,7 +4,7 @@ Living status file. Update after every prompt (see `docs/CURSOR_PROMPTS.md`).
 Status: ⬜ todo · 🟡 in progress · ✅ done
 
 ## Build sequence
-- ⬜ **P0** Bootstrap — conda env, `pip install -e .`, pre-commit, tooling green
+- ✅ **P0** Bootstrap — conda env, `pip install -e .`, pre-commit, tooling green
 - ⬜ **P1** `config.py` + `data_loader.py` (load BACI, map ISO3, filter, aggregate)
 - ⬜ **P2** `graph.py` + `db.py` + `schema.sql` → **NB01** graph + hero flow map
 - ⬜ **P3** `metrics.py` (centrality, backbone, rich-club) → **NB02** rankings (Austria)
@@ -26,4 +26,4 @@ Status: ⬜ todo · 🟡 in progress · ✅ done
   framing (that framing belongs to the sibling air-transport project).
 
 ## Current next step
-> Run **P0** from `docs/CURSOR_PROMPTS.md`.
+> Run **P1** from `docs/CURSOR_PROMPTS.md`.

@@ -18,8 +18,6 @@ has row limits on the free tier.
    - `product_codes_HS17_V<REL>.csv`
    (`<REL>` is the release tag, e.g. `202601`.)
 
-That is the only manual step. Everything else is scripted.
-
 > The full zip is large (all years). You only need one year's CSV in `data/raw/`; you can
 > delete the others. Keep the two metadata CSVs.
 

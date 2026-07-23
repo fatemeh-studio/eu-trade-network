@@ -62,6 +62,9 @@ conda env create -f environment.yml
 conda activate eu-trade-network
 pip install -e .
 pre-commit install
+# Notebook outputs are kept on disk but stripped from git via a local nbstripout
+# filter. .gitattributes names the filter; each clone must configure it once:
+nbstripout --install --attributes .gitattributes
 
 # 2. Data — one-time manual download (see data/README.md)
 #    place the BACI CSVs into data/raw/

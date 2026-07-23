@@ -1,4 +1,4 @@
-# AGENTS.md — operating rules for the Cursor agent (Grok 4.5)
+# AGENTS.md — operating rules for the Cursor agent (Opus 4.8)
 
 You are building **eu-trade-network**: a complex-systems analysis of the European
 merchandise-trade network. Follow these rules on **every** action. Do not ask the
@@ -42,12 +42,17 @@ user questions unless a task is genuinely blocked — proceed and state assumpti
   missing in ~2% of rows — do not rely on it.
 
 ## Git
+- **The user commits, not the agent.** Never run `git commit` (or `git add`/`git push`)
+  yourself. When a task is finished, remind the user to review and commit before you
+  begin the next task, and suggest a conventional-commit message they can use.
 - Conventional commits: `feat:`, `fix:`, `docs:`, `chore:`, `refactor:`, `test:`.
 - One logical change per commit. Never use "update" / "wip" as a message.
-- After finishing each Prompt in `docs/CURSOR_PROMPTS.md`, make a single commit and
-  update `PROGRESS.md`.
-- `nbstripout` runs via pre-commit and strips notebook outputs — commit notebooks with
-  code but no output. Never disable it.
+- After finishing each Prompt in `docs/CURSOR_PROMPTS.md`, remind the user to make a
+  single commit and update `PROGRESS.md`.
+- Notebook outputs are stripped **from git only** via the `nbstripout` **git clean
+  filter** (see `.gitattributes`), so outputs stay on disk for you to view but are never
+  committed. Do not re-add `nbstripout` as a pre-commit hook (that would wipe your local
+  outputs) and never disable the filter.
 
 ## Verification checklist (run at the end of every prompt)
 1. `ruff check . && ruff format --check .`
@@ -55,7 +60,7 @@ user questions unless a task is genuinely blocked — proceed and state assumpti
 3. `pytest`
 4. If a notebook changed: run `Restart & Run All`; confirm it completes with no errors.
 5. If `index.qmd` changed: `quarto render` succeeds.
-6. Commit + update `PROGRESS.md`.
+6. Update `PROGRESS.md`, then remind the user to review and commit (do not commit yourself).
 
 ## Analytical correctness (this project is judged on rigour — get these right)
 - The graph is **directed and weighted**: an edge i→j carries `value_kusd` = exports

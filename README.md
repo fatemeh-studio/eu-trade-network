@@ -3,7 +3,10 @@
 > Complex-systems analysis of European merchandise trade — **centrality**, **trade
 > communities**, and **network resilience** — built from CEPII BACI open data.
 
-![Trade flow map](figures/headline/01_flow_map.png)
+![Bilateral merchandise trade flows between the EU-27 and eight major partners, 2022](figures/headline/01_flow_map.png)
+
+**[→ Read the full report](index.qmd)** — RQ sections, figures, and an interactive
+community network. Render it locally with `quarto render` (output in `_site/`).
 
 ## The question
 
@@ -15,12 +18,14 @@ as a running reference point.
 
 ## Research questions & key findings
 
-<!-- Fill the [FILL] values from the notebooks. Keep the numbers specific. -->
-
 **RQ1 — Who is central, and where does Austria rank?**
-[FILL: e.g. "Germany dominates every centrality measure; Austria ranks Nth of 35 by
-betweenness, higher than its raw trade volume would suggest, reflecting its bridging role
-between Western and Central-Eastern Europe."]
+Germany holds the network together: weighted betweenness **0.829**, more than 4× China's
+**0.191**, despite China exporting *more* (1,654 bn vs 1,354 bn USD) — China is a source,
+Germany is a hub. Only **15 of 35** economies have positive betweenness at all, because the
+graph is complete (density = 1) and most pairs already trade directly. Austria is **not** a
+bridge: **betweenness = 0**, 17th of 35 by export strength (182 bn USD) and 13th by PageRank,
+with Germany its largest partner both ways. The disparity filter keeps **184 of 1,190 edges**
+at α = 0.05 ([`02_backbone_map.png`](figures/headline/02_backbone_map.png)).
 
 **RQ2 — Do trade communities emerge, and do they follow geography?**
 Weighted Louvain on the disparity-filter backbone finds **3 communities (modularity Q = 0.25)**:
@@ -59,8 +64,9 @@ measures the same Austrian flows hourly from ENTSO-E.
 **CEPII BACI** — harmonised bilateral trade flows at HS-6 product level, 200+ countries.
 Distributed under the Etalab Open Licence 2.0. Raw files are **not committed** (they are
 large and versioned); see [`data/README.md`](data/README.md) for the one-time download
-step. Scope: EU-27 plus major partners (~35 economies), year configurable in
-`src/eu_trade_network/config.py`.
+step. Scope: EU-27 plus 8 major partners (GBR, CHE, NOR, USA, CHN, TUR, RUS, JPN) =
+**35 economies**, **1,190** directed edges, **9,755 bn USD** of trade in **2022** — the
+year and country set are configurable in `src/eu_trade_network/config.py`.
 
 Source: Gaulier, G. & Zignago, S. (2010), *BACI: International Trade Database at the
 Product-Level*, CEPII Working Paper N°2010-23.

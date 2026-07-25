@@ -9,24 +9,117 @@ date: today
 
 Countries as nodes, directed weighted trade flows as edges. Three questions: who is
 central (and where does Austria sit), which trade communities emerge, and how resilient
-is the network to losing its hubs.
+is the network to losing its hubs. A fourth question treats energy (HS chapter 27) as a
+separate market and asks whether it behaves like the rest of merchandise trade.
 
-> This report is generated from the analysis notebooks. Fill each section from the
-> notebook outputs once they are built (Prompt 7).
+The short answer: the network is *complete* — every one of the 35 economies trades
+directly with every other — so the interesting structure is not in which links exist but
+in how lopsidedly value sits on them. That single fact shapes every result below.
+
+![Bilateral merchandise flows, 2022. Node size is export strength; the strongest
+corridors are drawn as arcs.](figures/headline/01_flow_map.png){#fig-flow}
 
 ## Data & method
 
-- Source: CEPII BACI, HS17, year `{FILL}`. Nodes: EU-27 + `{FILL}` partners.
-- Directed weighted graph (NetworkX) · DuckDB storage · disparity-filter backbone ·
-  Louvain communities · targeted-vs-random resilience.
+- Source: **CEPII BACI** (HS17), year **2022**, aggregated from HS-6 products to
+  bilateral country totals. Nodes: **EU-27 + 8 major partners** (GBR, CHE, NOR, USA,
+  CHN, TUR, RUS, JPN) = **35 economies**, **1,190** directed edges, **9,755 bn USD**
+  of trade.
+- Directed weighted graph in NetworkX (edge i→j = exports from i to j in thousands of
+  USD); DuckDB for node metrics, edges, community assignments, and the SQL rankings.
+- **Betweenness needs a distance, not a capacity.** Trade value is a capacity, so the
+  weighted betweenness below uses `distance = 1 / value_kusd`. Unweighted betweenness is
+  reported too and is identically **zero** on a complete digraph — every pair is already
+  adjacent, so no node ever sits on a shortest path.
+- **Eigenvector and PageRank** use `value_kusd` directly as the weight.
+- The graph is dense, so scale-free / small-world framing does not apply. Where a sparse
+  object is needed — for community detection and for the resilience story — we extract
+  the statistically significant **disparity-filter** backbone
+  (Serrano, Boguñá & Vespignani, PNAS 2009) at α = 0.05, which keeps
+  **184 of 1,190 edges**.
+- Randomness (Louvain, random-failure runs, layouts) is seeded from
+  `config.RANDOM_SEED = 42`.
 
-## RQ1 — Centrality and hubs
+::: {.callout-note}
+2022 is the energy-crisis year and the first year of large-scale Russia sanctions. Values
+are current USD, so the energy results in @sec-rq4 reflect prices as much as volumes.
+:::
 
-`{FILL: flow map + centrality table + Austria's rank}`
+## RQ1 — Centrality and hubs {#sec-rq1}
 
-## RQ2 — Trade communities
+**Germany holds the network together, and Austria does not bridge anything.**
 
-`{FILL: backbone + Louvain map + modularity}`
+Weighted betweenness is extraordinarily concentrated: Germany scores **0.829**, more than
+four times China's **0.191**, with Italy third at **0.138**. Only **15 of 35** economies
+have positive betweenness at all; the other 20 sit at exactly zero, because on a complete
+graph a country is only "between" two others if the cheapest path between them detours
+through it, and for most pairs the direct link is already the cheapest.
+
+| Rank | Economy | Weighted betweenness | Exports (bn USD) | PageRank |
+|-----:|---------|---------------------:|-----------------:|---------:|
+| 1 | Germany | 0.829 | 1,354 | 0.124 |
+| 2 | China | 0.191 | 1,654 | 0.069 |
+| 3 | Italy | 0.138 | 507 | 0.053 |
+| 4 | Spain | 0.059 | 321 | 0.038 |
+| 5 | Greece | 0.059 | 37 | 0.011 |
+| 9 | United States | 0.053 | 742 | 0.099 |
+
+: Top economies by weighted betweenness. Note Greece and Lithuania (rank 6) entering the
+top ten on tiny export volumes — betweenness rewards position, not size. {#tbl-centrality}
+
+The gap between the betweenness and the volume ranking is the point. China exports *more*
+than Germany (1,654 bn vs 1,354 bn USD) but scores a quarter of its betweenness: China is
+a large source, Germany is a hub. Conversely Greece and Lithuania break into the top ten
+on 37 bn USD of exports each, because they sit on cheap paths into the eastern
+Mediterranean and the Baltic.
+
+**Austria** is a mid-tier open economy with **zero betweenness**: 17th of 35 by export
+strength (182 bn USD) and 13th by PageRank. It is not a bridge in the value-weighted
+sense — its partners already trade with each other directly. Germany is its largest
+partner on both sides (56.5 bn USD of Austrian exports, 82.5 bn of imports), followed by
+Italy, then China on the import side and the USA on the export side.
+
+The rich-club coefficient is **1.0** for every degree from 24 upward: the well-connected
+economies are perfectly interconnected among themselves, which is what "density = 1"
+means locally. @fig-backbone shows the network after the disparity filter strips it to
+the 184 links that carry significantly more of a country's trade than a random allocation
+would.
+
+![The disparity-filter backbone: the 184 of 1,190 links that are statistically
+significant at α = 0.05.](figures/headline/02_backbone_map.png){#fig-backbone}
+
+## RQ2 — Trade communities {#sec-rq2}
+
+**Three blocs emerge, and they follow geography rather than EU membership.**
+
+Weighted Louvain runs on the undirected projection (i→j and j→i summed into one edge).
+On the full dense graph the partition is weak — 3 communities at **Q = 0.151**. On the
+backbone the same algorithm finds 3 communities at **Q = 0.252**, so that is the partition
+we keep: moderate but real structure, which is about what a densely integrated trade
+network should produce.
+
+| # | Community | Size | Members | Exports (bn USD) |
+|---|---|---:|---|---:|
+| 0 | Continental core | 23 | DEU, NLD, ITA, FRA, BEL, ESP, POL, CHE, CZE, AUT, HUN, SVK, ROU, PRT, SVN, BGR, LTU, GRC, HRV, LVA, LUX, MLT, CYP | 5,237 |
+| 1 | Extra-European partners | 7 | CHN, USA, JPN, RUS, GBR, IRL, TUR | 3,894 |
+| 2 | Nordic-Baltic | 5 | NOR, SWE, DNK, FIN, EST | 624 |
+
+: Louvain communities on the backbone, Q = 0.252. {#tbl-communities}
+
+The EU-27 does **not** form a bloc — it splits across all three communities. The
+boundaries are drawn by geography and trade intensity instead:
+
+- Non-members **Switzerland** and **Norway** sit comfortably inside their neighbouring EU
+  clusters (continental core and Nordic-Baltic respectively).
+- EU-member **Ireland** defects to the extra-European bloc built around the US, China and
+  the UK, because its exports are dominated by US-linked pharmaceuticals and tech.
+- The **Nordic-Baltic** cluster holds together on regional intensity despite being split
+  between EU members (SWE, DNK, FIN, EST) and a non-member (NOR).
+
+Political membership is not what the flow structure encodes. Proximity and volume are.
+
+![Economies coloured by Louvain community, sized by export strength, with the backbone
+drawn faintly behind them.](figures/headline/03_community_map.png){#fig-communities}
 
 ### Explore the network interactively
 
@@ -44,14 +137,139 @@ zoom, and use the on-canvas buttons to freeze the layout, refit, or toggle label
 
 [Open the interactive network in a new tab →](network_viz/03_trade_communities.html){target="_blank"}
 
-## RQ3 — Resilience
+## RQ3 — Resilience {#sec-rq3}
 
-`{FILL: targeted vs random curves + critical threshold}`
+**Connectivity never breaks. Value breaks almost immediately.**
 
-## RQ4 — Energy subnetwork (optional)
+Economies are removed one at a time, tracking two things after every removal: the
+**largest weakly-connected component** as a share of surviving economies, and the share
+of the **original trade value** still carried inside that component. Targeted removal
+takes hubs first — by out-strength, then by weighted betweenness, with both rankings
+fixed on the intact network. Random failure is the mean of 20 seeded runs.
 
-`{FILL: HS-27 vs total}`
+| Network | Strategy | Fragments at | Half of value gone at |
+|---|---|---:|---:|
+| Full graph | random | never (100%) | 28.6% (10 economies) |
+| Full graph | targeted (out-strength) | never (100%) | 8.6% (3) |
+| Full graph | targeted (betweenness) | never (100%) | 8.6% (3) |
+| Backbone | random | 88.6% (31) | 28.6% (10) |
+| Backbone | targeted (out-strength) | 40.0% (14) | 5.7% (2) |
+| Backbone | targeted (betweenness) | **34.3% (12)** | 5.7% (2) |
+
+: Critical fractions. "Fragments" = the largest component no longer holds half the
+surviving economies. {#tbl-resilience}
+
+On the **full graph** the connectivity panel is flat at 100% by construction — a complete
+digraph has no articulation point, so there is no bridge to cut and no trade agreement
+could add redundancy that is not already there. That is a finding, not an artefact.
+
+On the **backbone**, fragmentation becomes a real question and the answer is stark:
+betweenness-targeted removal breaks it after **34% of economies (12 of 35)**, export-volume
+targeting after **40% (14)**, against **89% (31)** under random failure. The network is
+roughly **2.6× more tolerant of accidents than of a deliberate hit list**, and bridge
+economies bite about two economies sooner than big exporters.
+
+**Value is far more fragile than topology.** Removing China alone strands 25% of the
+network's trade value; Germany alone strands 27%. Half of all trade value is gone once
+**three economies (China, Germany, the USA — 9% of nodes)** are removed. Random failure
+needs ten (29%) to do the same damage, making a targeted shock about **3.3× more
+efficient** than an untargeted one.
+
+The policy reading follows directly: stress-test the backbone rather than the full graph,
+because shocks travel along the significant corridors; treat **diversification, not
+redundancy**, as the lever, since the links already exist and it is the volume on them
+that is concentrated; and watch bridge economies alongside big exporters, because
+betweenness targeting fragments the backbone faster than volume targeting does.
+
+For **Austria**, this means 4.0% of network trade value and zero betweenness — not a
+chokepoint, and removing it changes nothing structurally. Its exposure runs the other
+way: dependency on Germany and the other top hubs, not its own criticality.
+
+![Resilience of the backbone: largest weakly-connected component (left) and retained
+trade value (right), targeted vs random removal.](figures/headline/04_resilience.png){#fig-resilience}
+
+## RQ4 — Energy subnetwork (HS-27) {#sec-rq4}
+
+**Same 35 economies, same near-complete topology, a structurally more concentrated
+market.**
+
+Rebuilding the edge list with HS chapter 27 only (coal, crude, refined products, gas,
+electricity) gives 1,146 links and **1,184 bn USD** — **12.1%** of merchandise value — at
+density 0.96.
+
+| Metric | All merchandise | Energy (HS-27) |
+|---|---:|---:|
+| Trade value (bn USD) | 9,755 | 1,184 |
+| Links (density) | 1,190 (1.00) | 1,146 (0.96) |
+| Largest exporter | CHN (17.0%) | RUS (23.4%) |
+| Top 3 exporters | CHN, DEU, USA | RUS, NOR, USA |
+| Top 3 export share | 38.4% | **54.6%** |
+| Herfindahl index | 0.075 | **0.124** |
+| Effective no. of exporters (1/HHI) | 13.4 | **8.0** |
+| Austria export rank | 17 of 35 (1.9%) | 12 of 35 (0.9%) |
+| Austria import rank | 15 of 35 (2.1%) | 18 of 35 (1.4%) |
+
+: Energy vs total trade, computed identically on both graphs. {#tbl-energy}
+
+The top three exporters carry **54.6%** of energy exports against **38.4%** for
+merchandise overall — a Herfindahl index of 0.124 vs 0.075, i.e. **8 effective suppliers
+instead of 13**. The leadership changes hands entirely: manufacturing hubs cannot sell
+resources they do not have, so resource exporters replace them. Russia and Norway sit far
+above the diagonal in the right-hand panel of @fig-energy; Germany and China well below
+it. Once again the risk is concentration, not connectivity — the energy graph is nearly
+complete, but the volume sits on very few sources.
+
+**Austria** is 12th of 35 by energy exports (0.9%) and 18th by imports, a net importer of
+5.5 bn USD. The ranking flatters it: Austria produces almost no fossil fuel, so its energy
+exports are re-exports and transit — **53% electricity, 26% gas, 17% refined products**
+passed on to neighbours. Its imports are equally intermediated, with **59% arriving via
+Germany**, which is a routing fact rather than a production one.
+
+Two caveats are part of the finding, not footnotes to it:
+
+1. **The frame misses the real suppliers.** Only **48%** of this node set's energy imports
+   originate inside it, against 65% for merchandise. Europe's crude and LNG largely come
+   from outside the 35 economies modelled here — the Gulf, Kazakhstan, North and West
+   Africa. This subgraph describes how energy is *redistributed* within Europe, not where
+   it comes from.
+2. **Pipeline gas is badly captured.** Austria's recorded HS-2711 imports inside the node
+   set are 0.4 bn USD against 2.9 bn of exports, which would make it a net gas exporter in
+   2022. It was not — it burned mostly Russian pipeline gas. Customs statistics attribute a
+   flow to the declared consignment partner, so gas crossing hubs and traded contracts
+   lands on the wrong edge. Read merchandise data as evidence about *value routed*, and use
+   physical flow data for dependence.
+
+**Bridge to the sibling project.** Electrical energy (HS-2716) is 9% of the energy
+network's value but **53% of Austria's energy exports** and 35% of its imports — 5.9 bn
+USD out against 5.7 bn in, an almost perfectly balanced position with Germany,
+Switzerland, Hungary and Slovenia. That is the same physical flow that
+[austria-energy-analysis](https://github.com/fatemeh-studio/austria-energy-analysis)
+measures hourly from ENTSO-E. Read together, this project locates Austria in Europe's
+energy exchange — mid-sized, intermediating, import-dependent — and the other explains
+what the exchange is for.
+
+![Left: cumulative export share down the exporter ranking (steeper = more concentrated).
+Right: each economy's energy export share against its merchandise export
+share.](figures/headline/05_energy_subnetwork.png){#fig-energy}
 
 ## Takeaways
 
-`{FILL: 3 bullet points}`
+1. **The European trade network has no structural weak point — it has a value weak
+   point.** Every economy trades directly with every other, so nothing fragments by
+   cutting links. But three economies carry half the value, and Germany alone carries 27%.
+   Resilience policy that adds redundant connections is solving a problem this network does
+   not have; diversifying volume away from the top handful of partners is the only lever
+   that moves the number.
+
+2. **Trade blocs are drawn by geography and intensity, not by treaty.** Louvain on the
+   significant-trade backbone splits the EU-27 across all three communities it finds
+   (Q = 0.252), places non-members Switzerland and Norway inside EU clusters, and sends
+   EU-member Ireland into the US-led bloc. If you want to predict who trades with whom,
+   distance and volume beat membership.
+
+3. **Position and size are different things, and energy proves it twice.** Germany
+   out-bridges China on a quarter of its export volume; Greece and Lithuania reach the
+   betweenness top ten on 37 bn USD each. In energy the ranking inverts entirely —
+   resource exporters replace manufacturing hubs, concentration nearly doubles
+   (8 effective suppliers vs 13), and Austria rises five places on exports it does not
+   produce but merely routes.

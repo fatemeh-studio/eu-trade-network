@@ -11,7 +11,7 @@ Status: ⬜ todo · 🟡 in progress · ✅ done
 - ✅ **P4** `communities.py` → **NB03** Louvain blocs + geo map + PyVis
 - ✅ **P5** `resilience.py` → **NB04** targeted vs random + critical threshold
 - ✅ **P6** `energy.py` → **NB05** energy (HS-27) subnetwork — bridge to energy project
-- ⬜ **P7** `index.qmd` report + README findings + headline figures + `v0.1.0` tag
+- ✅ **P7** `index.qmd` report + README findings + headline figures + `v0.1.0` tag
 
 ## Key findings (fill as you go)
 - RQ1 centrality / Austria rank: Germany dominates weighted betweenness (0.829);
@@ -62,5 +62,21 @@ Status: ⬜ todo · 🟡 in progress · ✅ done
 - RQ4 keeps the same 35-economy node set as RQ1–RQ3 for comparability, and reports the
   resulting blind spot explicitly (`energy.import_sourcing`) instead of widening it.
 
+## Deliverables (P7)
+- `index.qmd` — full report: overview, data & method, RQ1–RQ4 sections with tables and
+  headline figures, embedded interactive network, 3 takeaways. `quarto render` → `_site/`
+  (gitignored) and copies `figures/headline/` + `network_viz/` into the site.
+- `_quarto.yml` now pins `project.render` to `index.qmd` only, so repo docs
+  (`AGENTS.md`, `PROGRESS.md`, `docs/`) are no longer picked up as website pages.
+- `README.md` — every `[FILL]` replaced with run numbers; hero = `01_flow_map.png`;
+  report link added.
+- `figures/headline/` — one clean PNG per research question (01 hero flow map,
+  02 backbone/RQ1, 03 communities/RQ2, 04 resilience/RQ3, 05 energy/RQ4).
+- All five notebooks re-executed top-to-bottom with no errors; numbers above reproduce
+  exactly. Outputs live on disk, stripped from git by the nbstripout clean filter.
+- Green: `ruff check` · `ruff format --check` · `basedpyright` (0 errors) ·
+  `pytest` (36 passed) · `quarto render`.
+
 ## Current next step
-> Run **P7** (report, README findings, `v0.1.0` tag) from `docs/CURSOR_PROMPTS.md`.
+> **Publish repo** — commit `docs: report, README findings, headline figures`, tag
+> `v0.1.0`, and optionally `quarto publish gh-pages` + add the live link to the README.

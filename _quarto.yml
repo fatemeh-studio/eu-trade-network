@@ -1,6 +1,9 @@
 project:
   type: website
   output-dir: _site
+  render:
+    # Only the report is a site page; AGENTS.md / PROGRESS.md / docs/ are repo docs.
+    - index.qmd
   resources:
     # Interactive PyVis network (built by notebooks/03_communities.ipynb) copied
     # verbatim into the rendered site.

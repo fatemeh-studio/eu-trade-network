@@ -1589,6 +1589,301 @@ def plot_resilience(
     return fig
 
 
+# Energy figure: sky blue = all merchandise, orange = energy, purple = focus economy.
+_ENERGY_FOCUS = "#CC79A7"  # reddish purple
+
+# Pinned energy-comparison geometry (the label solver needs the rendered pixel sizes).
+_EN_W = 1240
+_EN_H = 560
+_EN_MARGIN = {"l": 78, "r": 40, "t": 132, "b": 132}
+
+
+def plot_energy_comparison(
+    total_shares: pd.DataFrame,
+    energy_shares: pd.DataFrame,
+    focus_iso3: str = "AUT",
+    top_k: int = 3,
+    labels: tuple[str, str] = ("All merchandise", "Energy (HS-27)"),
+    n_labelled: int = 5,
+    title: str | None = None,
+) -> go.Figure:
+    """Energy subnetwork vs total trade: export concentration and per-economy specialisation.
+
+    Left: cumulative share of network exports by exporter rank, one curve per network —
+    the steeper curve is the more concentrated market, with the ``top_k`` point marked.
+    Right: each economy's share of energy exports against its share of merchandise exports
+    (log-log). The diagonal is "energy share = merchandise share", so economies above it are
+    energy-specialised; ``focus_iso3`` is highlighted.
+
+    Args:
+        total_shares: Output of ``energy.trade_shares`` for the all-merchandise graph.
+        energy_shares: Output of ``energy.trade_shares`` for the energy subgraph.
+        focus_iso3: Economy to highlight in the scatter (Austria by default).
+        top_k: Concentration marker on the cumulative curve.
+        labels: Names of the two networks, in the order ``(total, energy)``.
+        n_labelled: Number of leading exporters labelled per network in the scatter.
+        title: Optional figure title.
+
+    Returns:
+        Plotly figure ready for display or :func:`save_fig`.
+    """
+    required = {"iso3", "export_share"}
+    for name, frame in zip(labels, (total_shares, energy_shares), strict=True):
+        missing = required - set(frame.columns)
+        if missing:
+            raise ValueError(f"{name} shares missing columns: {sorted(missing)}")
+
+    total_label, energy_label = labels
+    fig = make_subplots(
+        rows=1,
+        cols=2,
+        horizontal_spacing=0.10,
+        subplot_titles=(
+            "Export concentration (cumulative share by rank)",
+            "Energy specialisation (share of exports, log scale)",
+        ),
+    )
+    # Restyle the make_subplots panel titles before any other annotation is added.
+    fig.update_annotations(font={"color": _INK, "size": _FS_SUBTITLE})
+
+    # --- Panel 1: cumulative concentration curves ---------------------------------
+    top_k_shares: dict[str, float] = {}
+    for label, frame, color in (
+        (total_label, total_shares, _ACCENT),
+        (energy_label, energy_shares, _PARTNER),
+    ):
+        ranked = sorted((float(share) for share in frame["export_share"]), reverse=True)
+        cumulative: list[float] = []
+        running = 0.0
+        for share in ranked:
+            running += share
+            cumulative.append(running)
+        top_k_shares[label] = cumulative[min(top_k, len(cumulative)) - 1]
+        fig.add_trace(
+            go.Scatter(
+                x=list(range(1, len(cumulative) + 1)),
+                y=cumulative,
+                mode="lines+markers",
+                name=label,
+                legendgroup=label,
+                line={"width": 2.4, "color": color},
+                marker={"size": 5, "color": color},
+                hovertemplate=f"{label}<br>top %{{x}} exporters = %{{y:.1%}}<extra></extra>",
+            ),
+            row=1,
+            col=1,
+        )
+
+    fig.add_trace(
+        go.Scatter(
+            x=[top_k, top_k],
+            y=[0.0, max(top_k_shares.values())],
+            mode="lines",
+            line={"dash": "dot", "width": 1.2, "color": _MUTED},
+            showlegend=False,
+            hoverinfo="skip",
+        ),
+        row=1,
+        col=1,
+    )
+    fig.add_annotation(
+        x=0.95,
+        y=0.06,
+        xref="x domain",
+        yref="y domain",
+        text=(
+            f"Top {top_k} exporters carry <b>{top_k_shares[energy_label]:.0%}</b> of energy "
+            f"exports<br>vs {top_k_shares[total_label]:.0%} of all merchandise exports"
+        ),
+        showarrow=False,
+        xanchor="right",
+        yanchor="bottom",
+        font={"size": _FS_LABEL, "color": _INK},
+        bgcolor="rgba(18,20,26,0.78)",
+        bordercolor="rgba(255,255,255,0.16)",
+        borderwidth=1,
+        borderpad=3,
+    )
+
+    # --- Panel 2: energy share vs merchandise share -------------------------------
+    merged = total_shares[["iso3", "export_share"]].merge(
+        energy_shares[["iso3", "export_share"]],
+        on="iso3",
+        how="inner",
+        suffixes=("_total", "_energy"),
+    )
+    merged = merged.loc[
+        (merged["export_share_total"] > 0.0) & (merged["export_share_energy"] > 0.0)
+    ].reset_index(drop=True)
+    merged["specialised"] = merged["export_share_energy"] > merged["export_share_total"]
+
+    lo = float(min(merged["export_share_total"].min(), merged["export_share_energy"].min()))
+    hi = float(max(merged["export_share_total"].max(), merged["export_share_energy"].max()))
+    log_lo, log_hi = math.log10(lo) - 0.4, math.log10(hi) + 0.55
+
+    fig.add_trace(
+        go.Scatter(
+            x=[10**log_lo, 10**log_hi],
+            y=[10**log_lo, 10**log_hi],
+            mode="lines",
+            line={"dash": "dot", "width": 1.2, "color": _MUTED},
+            showlegend=False,
+            hoverinfo="skip",
+        ),
+        row=1,
+        col=2,
+    )
+
+    focus_mask = merged["iso3"].astype(str) == focus_iso3
+    others = ~focus_mask
+    groups = (
+        (
+            "Energy-specialised (above the line)",
+            merged.loc[merged["specialised"] & others],
+            _PARTNER,
+        ),
+        ("Energy-light (below the line)", merged.loc[~merged["specialised"] & others], _ACCENT),
+        (focus_iso3, merged.loc[focus_mask], _ENERGY_FOCUS),
+    )
+    for name, frame, color in groups:
+        if frame.empty:
+            continue
+        fig.add_trace(
+            go.Scatter(
+                x=frame["export_share_total"].astype(float).tolist(),
+                y=frame["export_share_energy"].astype(float).tolist(),
+                mode="markers",
+                name=name,
+                marker={
+                    "size": 15 if name == focus_iso3 else 10,
+                    "color": color,
+                    "line": {"width": 0.8, "color": _MARKER_LINE},
+                    "symbol": "diamond" if name == focus_iso3 else "circle",
+                },
+                text=frame["iso3"].astype(str).tolist(),
+                hovertemplate=(
+                    "%{text}<br>merchandise = %{x:.2%}<br>energy = %{y:.2%}<extra></extra>"
+                ),
+            ),
+            row=1,
+            col=2,
+        )
+
+    fig.update_xaxes(
+        **_axis_dark(title_text="Exporter rank (1 = largest)", range=[0.5, len(merged) + 0.5]),
+        row=1,
+        col=1,
+    )
+    fig.update_yaxes(
+        **_axis_dark(
+            title_text="Cumulative share of network exports",
+            range=[0.0, 1.05],
+            tickformat=".0%",
+        ),
+        row=1,
+        col=1,
+    )
+    share_ticks = [1e-4, 1e-3, 1e-2, 1e-1]
+    share_text = ["0.01%", "0.1%", "1%", "10%"]
+    fig.update_xaxes(
+        **_axis_dark(
+            title_text=f"Share of {total_label.lower()} exports",
+            type="log",
+            range=[log_lo, log_hi],
+            tickvals=share_ticks,
+            ticktext=share_text,
+        ),
+        row=1,
+        col=2,
+    )
+    fig.update_yaxes(
+        **_axis_dark(
+            title_text="Share of energy exports",
+            type="log",
+            range=[log_lo, log_hi],
+            tickvals=share_ticks,
+            ticktext=share_text,
+        ),
+        row=1,
+        col=2,
+    )
+
+    fig.update_layout(
+        **_dark_layout(
+            title={
+                "text": title
+                or "Energy (HS-27) exports are far more concentrated than merchandise trade",
+                "x": 0.01,
+                "xanchor": "left",
+                "font": {"size": _FS_TITLE, "color": _INK},
+            },
+            height=_EN_H,
+            width=_EN_W,
+            margin=_EN_MARGIN,
+            legend={
+                "orientation": "h",
+                "yanchor": "bottom",
+                "y": 1.10,
+                "xanchor": "right",
+                "x": 1.0,
+                "bgcolor": "rgba(18,20,26,0.55)",
+                "bordercolor": "rgba(255,255,255,0.12)",
+                "borderwidth": 1,
+                "font": {"color": _INK, "size": _FS_LEGEND},
+            },
+        )
+    )
+    # Label the focus economy first (it gets the best free slot), then the leading
+    # exporters of each network.
+    hubs: list[str] = [focus_iso3]
+    for frame in (energy_shares, total_shares):
+        leaders = frame.sort_values("export_share", ascending=False)["iso3"].astype(str)
+        hubs.extend(iso for iso in leaders.head(n_labelled) if iso not in hubs)
+
+    by_iso = merged.set_index(merged["iso3"].astype(str))
+    points = [
+        {
+            "x": math.log10(float(by_iso.loc[iso, "export_share_total"])),
+            "y": math.log10(float(by_iso.loc[iso, "export_share_energy"])),
+            "text": iso,
+        }
+        for iso in hubs
+        if iso in by_iso.index
+    ]
+    obstacles = tuple(
+        (math.log10(float(x)), math.log10(float(y)))
+        for x, y in merged[["export_share_total", "export_share_energy"]].itertuples(
+            index=False, name=None
+        )
+    )
+    for ann in _place_labels(
+        points,
+        x_range=(log_lo, log_hi),
+        y_range=(log_lo, log_hi),
+        fig_w=_EN_W,
+        fig_h=_EN_H,
+        margin=_EN_MARGIN,
+        x_domain=(0.55, 1.0),
+        y_domain=(0.0, 1.0),
+        xref="x2",
+        yref="y2",
+        obstacles=obstacles,
+        radii=(30.0, 46.0, 66.0, 92.0, 120.0),
+    ):
+        fig.add_annotation(**ann)
+
+    fig.add_annotation(
+        **_footnote(
+            "Exports valued in thousand USD (CEPII BACI) · shares are of trade "
+            "<i>within</i> the 35-economy node set<br>"
+            "Dotted diagonal: energy share = merchandise share. Above it, an economy is "
+            "more important in energy than its overall trade weight implies.",
+            y=-0.28,
+        )
+    )
+    return fig
+
+
 def save_fig(
     fig: go.Figure,
     name: str,

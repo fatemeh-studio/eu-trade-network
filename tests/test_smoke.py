@@ -24,7 +24,16 @@ def test_year_and_seed():
 
 
 def test_all_modules_import():
-    for mod in ("data_loader", "graph", "metrics", "communities", "resilience", "db", "viz"):
+    for mod in (
+        "data_loader",
+        "graph",
+        "metrics",
+        "communities",
+        "resilience",
+        "energy",
+        "db",
+        "viz",
+    ):
         importlib.import_module(f"eu_trade_network.{mod}")
 
 

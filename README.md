@@ -39,9 +39,20 @@ than of a deliberate hit list. **Value is far more fragile than topology**: losi
 **three economies (China, Germany, the USA — 9% of nodes) halves total trade value**, while
 random failure needs ten (29%). Germany alone carries 27% of the network's trade value.
 
-**RQ4 (optional) — Energy trade (HS-27) vs total trade**
-[FILL: e.g. "The energy-commodity subnetwork is more concentrated: the top 3 exporters
-account for Z% of energy flows vs W% of total flows."]
+**RQ4 — Energy trade (HS-27) vs total trade**
+Energy is **12% of the network's value** but a structurally different market: the **top 3
+exporters carry 55% of energy exports (Russia, Norway, the USA) against 38% for merchandise
+overall** (China, Germany, the USA) — a Herfindahl index of 0.124 vs 0.075, i.e. **8 effective
+suppliers instead of 13**. The manufacturing hubs that dominate merchandise trade cannot sell
+resources they do not have, so resource exporters take their place. Austria is **12th of 35 by
+energy exports** and a net importer; its energy exports are re-exports and transit (53%
+electricity, 26% gas) and 59% of its energy imports arrive via Germany. Two caveats are part of
+the finding: only **48% of these economies' energy imports originate inside the node set**
+(65% for merchandise), and pipeline gas is misattributed by customs data — so this is a map of
+how energy is *redistributed* within Europe, not of where it comes from. Electricity (HS-2716)
+is the bridge to the sibling project
+[austria-energy-analysis](https://github.com/fatemeh-studio/austria-energy-analysis), which
+measures the same Austrian flows hourly from ENTSO-E.
 
 ## Data
 
@@ -87,7 +98,7 @@ quarto render
 ## Project structure
 
 ```
-src/eu_trade_network/   analysis package (data, graph, metrics, communities, resilience, db, viz)
+src/eu_trade_network/   analysis package (data, graph, metrics, communities, resilience, energy, db, viz)
 notebooks/              01 construction → 02 centrality+backbone → 03 communities → 04 resilience → 05 energy
 sql/                    schema.sql + analytical queries
 data/                   raw/ processed/ external/ (gitignored) · reference/ (committed)

@@ -1,0 +1,493 @@
+[
+  {
+    "objectID": "network.html",
+    "href": "network.html",
+    "title": "Interactive network",
+    "section": "",
+    "text": "Same Louvain partition as 03 · Communities, as a force-directed graph.\nRead. Colour = community (continental core / Nordic-Baltic / extra-European partners). Size ∝ total trade strength. Edge width ∝ summed bilateral value.\nUse. Hover for figures, drag to pull a bloc apart, scroll to zoom; on-canvas buttons freeze, refit, or toggle labels. Layout seeded from config.RANDOM_SEED.\n\nOpen full screen in a new tab →\n\n\n\n\n\n\nTipWhy the blocs are not the EU\n\n\n\n\n\nThe partition splits the EU-27 across all three communities, places non-members Switzerland and Norway inside EU clusters, and sends EU-member Ireland into the US-led bloc. The reasoning is in 03 · Communities.",
+    "crumbs": [
+      "Overview",
+      "Interactive network"
+    ]
+  },
+  {
+    "objectID": "notebooks/04_resilience.html",
+    "href": "notebooks/04_resilience.html",
+    "title": "04 · Resilience",
+    "section": "",
+    "text": "RQ3 — how much of the network survives losing its hubs? Economies are removed one at a time, targeted and at random, tracking both connectivity and retained trade value.\nThe removal protocol is described on the Data & method page.\nThe simulation runs twice, and the pairing is the point. The full graph is complete, so it cannot fragment topologically — there the value curve carries the whole story. The disparity-filter backbone keeps only statistically significant links, and that is where asking whether the network can break apart actually means something.\nShow code\nfrom __future__ import annotations\n\nimport textwrap\n\nimport pandas as pd\n\nfrom eu_trade_network import config, data_loader, graph, metrics, resilience, viz\n\nN_RANDOM_RUNS = 20",
+    "crumbs": [
+      "Overview",
+      "Analysis",
+      "04 · Resilience (RQ3)"
+    ]
+  },
+  {
+    "objectID": "notebooks/04_resilience.html#graph-backbone",
+    "href": "notebooks/04_resilience.html#graph-backbone",
+    "title": "04 · Resilience",
+    "section": "Graph + backbone",
+    "text": "Graph + backbone\nRebuild the directed weighted graph for config.YEAR and extract the disparity-filter backbone.\n\n\nShow code\nedgelist = data_loader.build_edgelist()\nG = graph.build_graph(edgelist)\nbackbone = metrics.disparity_filter(G, alpha=config.DISPARITY_ALPHA)\n\nsummary = graph.graph_summary(G)\nn_nodes = int(summary[\"n_nodes\"])\nprint(\n    f\"Full graph: {n_nodes} economies, {int(summary['n_edges'])} edges, \"\n    f\"density = {summary['density']:.2f}, \"\n    f\"total trade = {summary['total_value_kusd'] / 1e6:,.0f} bn USD\"\n)\nprint(\n    f\"Backbone (alpha = {config.DISPARITY_ALPHA}): {backbone.number_of_nodes()} economies, \"\n    f\"{backbone.number_of_edges()} significant edges\"\n)",
+    "crumbs": [
+      "Overview",
+      "Analysis",
+      "04 · Resilience (RQ3)"
+    ]
+  },
+  {
+    "objectID": "notebooks/04_resilience.html#who-goes-first",
+    "href": "notebooks/04_resilience.html#who-goes-first",
+    "title": "04 · Resilience",
+    "section": "Who goes first?",
+    "text": "Who goes first?\nThe two targeted hit lists. Out-strength ranks by export volume; weighted betweenness ranks by how often an economy sits on the cheapest trade path between two others.\n\n\nShow code\ntop_n = 8\nby_strength = resilience.simulate_removal(G, \"strength\")\nby_betweenness = resilience.simulate_removal(G, \"betweenness\")\n\nhit_lists = pd.DataFrame(\n    {\n        \"rank\": range(1, top_n + 1),\n        \"by out-strength\": by_strength[\"removed_node\"].tolist()[1 : top_n + 1],\n        \"by betweenness\": by_betweenness[\"removed_node\"].tolist()[1 : top_n + 1],\n    }\n).set_index(\"rank\")\nhit_lists",
+    "crumbs": [
+      "Overview",
+      "Analysis",
+      "04 · Resilience (RQ3)"
+    ]
+  },
+  {
+    "objectID": "notebooks/04_resilience.html#full-network-connectivity-never-breaks-value-does",
+    "href": "notebooks/04_resilience.html#full-network-connectivity-never-breaks-value-does",
+    "title": "04 · Resilience",
+    "section": "Full network — connectivity never breaks, value does",
+    "text": "Full network — connectivity never breaks, value does\nOn a complete digraph the largest component always holds every survivor, so the left panel is flat at 100% by construction. That is the finding: this network has no articulation point. The right panel shows what is actually at stake.\n\n\nShow code\ncurves_full = resilience.run_random_vs_targeted(G, n_random_runs=N_RANDOM_RUNS)\n\nfig_full = viz.plot_resilience(\n    curves_full,\n    title=f\"Full trade network ({n_nodes} economies, density = 1) — hub attack vs random failure\",\n)\nout = viz.save_fig(fig_full, \"04_resilience_full_graph.png\", headline=False)\nprint(f\"Saved {out}\")\nfig_full.show()",
+    "crumbs": [
+      "Overview",
+      "Analysis",
+      "04 · Resilience (RQ3)"
+    ]
+  },
+  {
+    "objectID": "notebooks/04_resilience.html#significant-trade-backbone-where-fragmentation-happens",
+    "href": "notebooks/04_resilience.html#significant-trade-backbone-where-fragmentation-happens",
+    "title": "04 · Resilience",
+    "section": "Significant-trade backbone — where fragmentation happens",
+    "text": "Significant-trade backbone — where fragmentation happens\nRepeat the simulation on the disparity-filter backbone, i.e. the sub-network of links that carry a significantly larger share of a country’s trade than a random allocation would give them. This is the headline figure for RQ3.\n\n\nShow code\ncurves_bb = resilience.run_random_vs_targeted(backbone, n_random_runs=N_RANDOM_RUNS)\n\nfig_bb = viz.plot_resilience(\n    curves_bb,\n    title=(\n        f\"Significant-trade backbone (alpha = {config.DISPARITY_ALPHA}) — \"\n        \"hub attack vs random failure\"\n    ),\n)\nout = viz.save_fig(fig_bb, \"04_resilience.png\", headline=True)\nprint(f\"Saved {out}\")\nfig_bb.show()",
+    "crumbs": [
+      "Overview",
+      "Analysis",
+      "04 · Resilience (RQ3)"
+    ]
+  },
+  {
+    "objectID": "notebooks/04_resilience.html#critical-fraction",
+    "href": "notebooks/04_resilience.html#critical-fraction",
+    "title": "04 · Resilience",
+    "section": "Critical fraction",
+    "text": "Critical fraction\ncritical_threshold reports the first removal fraction at which the largest component holds less than half of the surviving economies; value_threshold does the same for retained trade value. A critical fraction of 100% means “never fragments” — the curve only crosses when the graph is emptied.\n\n\nShow code\nrows = []\nfor network, curves in ((\"full graph\", curves_full), (\"backbone\", curves_bb)):\n    for strategy, frame in curves.groupby(\"strategy\", sort=False):\n        crit = resilience.critical_threshold(frame)\n        half = resilience.value_threshold(frame)\n        rows.append(\n            {\n                \"network\": network,\n                \"strategy\": str(strategy),\n                \"critical_fraction\": crit,\n                \"economies_to_fragment\": round(crit * n_nodes),\n                \"half_value_fraction\": half,\n                \"economies_to_halve_value\": round(half * n_nodes),\n            }\n        )\n\nthresholds = pd.DataFrame(rows)\nthresholds.style.format({\"critical_fraction\": \"{:.1%}\", \"half_value_fraction\": \"{:.1%}\"}).hide(\n    axis=\"index\"\n)",
+    "crumbs": [
+      "Overview",
+      "Analysis",
+      "04 · Resilience (RQ3)"
+    ]
+  },
+  {
+    "objectID": "notebooks/04_resilience.html#what-this-means-rq3",
+    "href": "notebooks/04_resilience.html#what-this-means-rq3",
+    "title": "04 · Resilience",
+    "section": "What this means (RQ3)",
+    "text": "What this means (RQ3)\nThe paragraphs below are generated from the run above, so the numbers always match the figures.\n\n\nShow code\ndef _pick(network: str, strategy: str, column: str) -&gt; float:\n    row = thresholds.loc[(thresholds[\"network\"] == network) & (thresholds[\"strategy\"] == strategy)]\n    return float(row[column].to_numpy()[0])\n\n\ncrit_strength = _pick(\"backbone\", resilience.STRENGTH_STRATEGY, \"critical_fraction\")\ncrit_between = _pick(\"backbone\", resilience.BETWEENNESS_STRATEGY, \"critical_fraction\")\ncrit_random = _pick(\"backbone\", resilience.RANDOM_STRATEGY, \"critical_fraction\")\nhalf_targeted = _pick(\"full graph\", resilience.STRENGTH_STRATEGY, \"half_value_fraction\")\nhalf_random = _pick(\"full graph\", resilience.RANDOM_STRATEGY, \"half_value_fraction\")\n\nn_half = round(half_targeted * n_nodes)\ntop_exporters = by_strength[\"removed_node\"].tolist()[1 : n_half + 1]\nlost_first = 1.0 - float(by_strength[\"trade_value_retained\"].to_numpy()[1])\nlost_deu = 1.0 - float(by_betweenness[\"trade_value_retained\"].to_numpy()[1])\naut_rank = by_strength[\"removed_node\"].tolist().index(\"AUT\")\naut_curve = resilience.simulate_removal(G, [\"AUT\"])\naut_share = 1.0 - float(aut_curve[\"trade_value_retained\"].to_numpy()[1])\n\nparagraphs = [\n    f\"CRITICAL FRACTION. On the significant-trade backbone the network breaks apart once \"\n    f\"{crit_between:.0%} of economies ({round(crit_between * n_nodes)} of {n_nodes}) are removed \"\n    f\"in betweenness order, or {crit_strength:.0%} ({round(crit_strength * n_nodes)}) in \"\n    f\"export-volume order — 'broken' meaning the largest surviving component no longer holds \"\n    f\"half the remaining economies. Random failure has to take out {crit_random:.0%} \"\n    f\"({round(crit_random * n_nodes)}) before the same thing happens, so the backbone is about \"\n    f\"{crit_random / crit_between:.1f}x more tolerant of accidents than of a deliberate hit \"\n    f\"list. Bridge economies bite sooner than big exporters: targeting betweenness fragments \"\n    f\"the backbone {(crit_strength - crit_between) * n_nodes:.0f} economies earlier than \"\n    f\"targeting export volume.\",\n    \"CONNECTIVITY IS NOT THE WEAK POINT. The full network is complete (density = 1): every \"\n    \"economy trades directly with every other, so nothing short of emptying it leaves anyone \"\n    \"stranded. There is no bridge to cut, and no trade agreement can add redundancy that is not \"\n    \"already there. Resilience here is not about whether the links exist — it is about how \"\n    \"lopsidedly the value sits on them.\",\n    f\"VALUE IS THE WEAK POINT. Losing the single largest exporter ({top_exporters[0]}) already \"\n    f\"strands {lost_first:.0%} of this {n_nodes}-economy network's merchandise trade value; \"\n    f\"losing Germany alone strands {lost_deu:.0%}. Half of all trade value is gone once \"\n    f\"{n_half} economies ({', '.join(top_exporters)}) are removed — {half_targeted:.0%} of the \"\n    f\"nodes. Random failure needs {round(half_random * n_nodes)} economies ({half_random:.0%}) \"\n    f\"for the same damage, making a targeted shock roughly \"\n    f\"{half_random / half_targeted:.1f}x more efficient than an untargeted one.\",\n    \"POLICY READING. (1) Stress-test the backbone, not the full graph: shocks travel along the \"\n    \"significant corridors, and that is the object that actually fragments. (2) Diversification, \"\n    \"not redundancy, is the lever — the links already exist; the volume on them is what is \"\n    \"concentrated, so exposure falls only by shifting trade away from the top handful of \"\n    \"partners. (3) Watch bridge economies as well as big exporters: on the backbone, betweenness \"\n    \"targeting fragments the network faster than volume targeting, which is exactly the failure \"\n    \"mode a supply-chain contingency plan should model.\",\n    f\"(4) AUSTRIA. A mid-sized open economy: {aut_rank}th of {n_nodes} by export volume and \"\n    f\"{aut_share:.1%} of the network's trade value, with zero betweenness on the full graph \"\n    f\"(NB02) because its partners already trade directly. Austria is therefore not a chokepoint \"\n    f\"— removing it changes nothing structurally — but it sits downstream of the economies that \"\n    f\"are. Its resilience question is dependency on Germany and the other top hubs, not its own \"\n    f\"criticality.\",\n]\nfor paragraph in paragraphs:\n    print(textwrap.fill(paragraph, width=94), end=\"\\n\\n\")",
+    "crumbs": [
+      "Overview",
+      "Analysis",
+      "04 · Resilience (RQ3)"
+    ]
+  },
+  {
+    "objectID": "notebooks/02_centrality_and_backbone.html",
+    "href": "notebooks/02_centrality_and_backbone.html",
+    "title": "02 · Centrality & backbone",
+    "section": "",
+    "text": "RQ1 — who is central, and where does Austria rank? Computes degree, strength, betweenness, eigenvector centrality and PageRank on the directed weighted graph, ranks the hubs through SQL, and extracts the disparity-filter backbone.\nWhy weighted betweenness uses distance = 1 / value_kusd, and why unweighted betweenness is identically zero here, is explained on the Data & method page.\nShow code\nfrom __future__ import annotations\n\nimport pandas as pd\nfrom IPython.display import Markdown, display\n\nfrom eu_trade_network import config, data_loader, db, graph, metrics, viz",
+    "crumbs": [
+      "Overview",
+      "Analysis",
+      "02 · Centrality (RQ1)"
+    ]
+  },
+  {
+    "objectID": "notebooks/02_centrality_and_backbone.html#graph-centralities",
+    "href": "notebooks/02_centrality_and_backbone.html#graph-centralities",
+    "title": "02 · Centrality & backbone",
+    "section": "Graph + centralities",
+    "text": "Graph + centralities\nRebuild the edge list / digraph for config.YEAR, compute strengths and centralities, then refresh the DuckDB nodes table.\n\n\nShow code\nedgelist = data_loader.build_edgelist()\nG = graph.build_graph(edgelist)\nsummary = graph.graph_summary(G)\ncent = metrics.compute_centralities(G)\n\nnode_meta = (\n    pd.DataFrame([{\"iso3\": n, **attrs} for n, attrs in G.nodes(data=True)])\n    .sort_values(\"iso3\")\n    .reset_index(drop=True)\n)\nnodes_db = node_meta.merge(cent, on=\"iso3\", how=\"inner\")\n\ncon = db.connect()\ndb.init_schema(con)\ndb.write_table(\n    con,\n    \"nodes\",\n    nodes_db[\n        [\n            \"iso3\",\n            \"name\",\n            \"grp\",\n            \"out_strength\",\n            \"in_strength\",\n            \"degree\",\n            \"betweenness\",\n            \"betweenness_u\",\n            \"eigenvector\",\n            \"pagerank\",\n        ]\n    ],\n)\n\n# Keep edges in sync if NB01 has not been run in this environment.\nedges_db = edgelist.copy()\nedges_db[\"year\"] = config.YEAR\ndb.write_table(con, \"edges\", edges_db[[\"exporter_iso3\", \"importer_iso3\", \"value_kusd\", \"year\"]])\n\nprint(summary)\nprint(f\"Updated {len(nodes_db)} nodes → {config.DB_PATH}\")\ncent.sort_values(\"betweenness\", ascending=False).head(10)",
+    "crumbs": [
+      "Overview",
+      "Analysis",
+      "02 · Centrality (RQ1)"
+    ]
+  },
+  {
+    "objectID": "notebooks/02_centrality_and_backbone.html#sql-rankings-rq1",
+    "href": "notebooks/02_centrality_and_backbone.html#sql-rankings-rq1",
+    "title": "02 · Centrality & backbone",
+    "section": "SQL rankings (RQ1)",
+    "text": "SQL rankings (RQ1)\nHub ranking by weighted betweenness, then Austria’s bilateral partners.\n\n\nShow code\nhubs = db.read_sql(con, config.SQL_DIR / \"queries\" / \"01_top_hubs_by_betweenness.sql\")\nhubs\n\n\n\n\nShow code\naut_partners = db.read_sql(con, config.SQL_DIR / \"queries\" / \"03_austria_trade_partners.sql\")\naut_partners\n\n\n\n\nShow code\naut = hubs.loc[hubs[\"iso3\"] == \"AUT\"].iloc[0]\naut_pr_rank = int(\n    hubs.sort_values(\"pagerank\", ascending=False)\n    .reset_index(drop=True)\n    .assign(r=lambda d: d.index + 1)\n    .loc[lambda d: d[\"iso3\"] == \"AUT\", \"r\"]\n    .iloc[0]\n)\naut_str_rank = int(\n    cent.sort_values(\"out_strength\", ascending=False)\n    .reset_index(drop=True)\n    .assign(r=lambda d: d.index + 1)\n    .loc[lambda d: d[\"iso3\"] == \"AUT\", \"r\"]\n    .iloc[0]\n)\nn_zero_b = int((hubs[\"betweenness\"] == 0).sum())\nn_pos_b = int((hubs[\"betweenness\"] &gt; 0).sum())\ntop_hub = hubs.iloc[0]\n\ndisplay(\n    Markdown(\n        f\"**{top_hub['name']} leads, and position is not volume.** \"\n        f\"{top_hub['name']} ({top_hub['iso3']}) scores \"\n        f\"{float(top_hub['betweenness']):.3f} on weighted betweenness. Only {n_pos_b} of \"\n        f\"{len(hubs)} economies score above zero at all, because the digraph is complete \"\n        f\"(density = {summary['density']:.2f}): for most pairs the direct link is already \"\n        f\"the cheapest path, so nobody sits between them.\\n\\n\"\n        f\"**Austria is not a bridge.** It is one of the {n_zero_b} economies with \"\n        f\"betweenness = 0 — the SQL rank of {int(aut['rank'])} is an arbitrary tie-break \"\n        f\"among those zeros, not a ranking. Its partners already trade with each other \"\n        f\"directly. By export strength Austria is {aut_str_rank}th of {len(hubs)} and by \"\n        f\"PageRank {aut_pr_rank}th: a mid-tier EU economy whose largest partner is Germany \"\n        f\"on both sides of the trade balance.\"\n    )\n)",
+    "crumbs": [
+      "Overview",
+      "Analysis",
+      "02 · Centrality (RQ1)"
+    ]
+  },
+  {
+    "objectID": "notebooks/02_centrality_and_backbone.html#strength-distribution",
+    "href": "notebooks/02_centrality_and_backbone.html#strength-distribution",
+    "title": "02 · Centrality & backbone",
+    "section": "Strength distribution",
+    "text": "Strength distribution\nThe network is dense (near-complete bilateral coverage). We plot the strength ranking and do not fit a power law.\n\n\nShow code\nfig_strength = viz.plot_degree_distribution(cent)\nfig_strength.show()",
+    "crumbs": [
+      "Overview",
+      "Analysis",
+      "02 · Centrality (RQ1)"
+    ]
+  },
+  {
+    "objectID": "notebooks/02_centrality_and_backbone.html#disparity-filter-backbone",
+    "href": "notebooks/02_centrality_and_backbone.html#disparity-filter-backbone",
+    "title": "02 · Centrality & backbone",
+    "section": "Disparity-filter backbone",
+    "text": "Disparity-filter backbone\nStatistically significant edges at config.DISPARITY_ALPHA (Serrano, Boguñá & Vespignani 2009). Also compute the rich-club coefficient on the undirected projection.\n\n\nShow code\nbackbone = metrics.disparity_filter(G, alpha=config.DISPARITY_ALPHA)\nbb_edges = pd.DataFrame(\n    [\n        {\"exporter_iso3\": u, \"importer_iso3\": v, \"value_kusd\": float(d[\"weight\"])}\n        for u, v, d in backbone.edges(data=True)\n    ]\n)\nrc = metrics.rich_club(G)\n\nprint(\n    f\"Backbone keeps {backbone.number_of_edges()} / {G.number_of_edges()} edges \"\n    f\"at alpha={config.DISPARITY_ALPHA}\"\n)\nrc.tail(10)\n\n\n\n\nShow code\n# Two-panel backbone map: Europe detail + global context (kaleido-safe).\nfig_backbone = viz.plot_backbone_map(\n    bb_edges,\n    nodes_db,\n    title=(\n        f\"Disparity-filter backbone (α={config.DISPARITY_ALPHA}): \"\n        f\"{backbone.number_of_edges()} significant edges\"\n    ),\n)\nout = viz.save_fig(fig_backbone, \"02_backbone_map.png\", headline=True)\nprint(f\"Saved {out}\")\nfig_backbone.show()\n\ncon.close()",
+    "crumbs": [
+      "Overview",
+      "Analysis",
+      "02 · Centrality (RQ1)"
+    ]
+  },
+  {
+    "objectID": "data.html",
+    "href": "data.html",
+    "title": "Data & Methods",
+    "section": "",
+    "text": "This page is the single reference for the data source and the analytical decisions. The analysis notebooks assume it rather than restating it.",
+    "crumbs": [
+      "Overview",
+      "Data & Methods"
+    ]
+  },
+  {
+    "objectID": "data.html#source-cepii-baci",
+    "href": "data.html#source-cepii-baci",
+    "title": "Data & Methods",
+    "section": "Source — CEPII BACI",
+    "text": "Source — CEPII BACI\nBACI is CEPII’s harmonised bilateral trade database, reconstructed from UN Comtrade with the mirror-flow discrepancies between what an exporter declares and what the importer records reconciled into a single value per flow. It covers 200+ countries at HS-6 product level and is the standard source for academic trade-network work.\nIt was chosen over two alternatives. The UN Comtrade API needs a registered key and caps rows per call on the free tier, so a full bilateral matrix takes many paginated requests. Eurostat Comext is EU-reporter-centric, so flows between two non-EU partners are thin — that asymmetry would distort a network where the partners are nodes in their own right.\nEach row of the raw file is one exporter × importer × product × year observation. Two column facts matter analytically:\n\nv — trade value in thousands of current USD. Everything in this project is value, never volume.\nq — quantity in metric tons, missing in roughly 2% of rows. It is not used anywhere.\n\nRaw files are not committed. See data/README.md in the repository for the one-time download.",
+    "crumbs": [
+      "Overview",
+      "Data & Methods"
+    ]
+  },
+  {
+    "objectID": "data.html#scope-the-node-set",
+    "href": "data.html#scope-the-node-set",
+    "title": "Data & Methods",
+    "section": "Scope — the node set",
+    "text": "Scope — the node set\nThe network is the EU-27 plus 8 major trading partners (GBR, CHE, NOR, USA, CHN, TUR, RUS, JPN) = 35 economies, for the year 2022. Both the year and the country set live in src/eu_trade_network/config.py and can be changed without touching any notebook.\nProducts are aggregated over all HS chapters for the merchandise network, and restricted to HS chapter 27 (mineral fuels, oils, gas, electricity) for the energy subnetwork in RQ4. Self-loops are dropped, and a flow is kept only when both endpoints are in the node set — a restriction whose cost is measured explicitly in RQ4.",
+    "crumbs": [
+      "Overview",
+      "Data & Methods"
+    ]
+  },
+  {
+    "objectID": "data.html#how-the-network-is-modelled",
+    "href": "data.html#how-the-network-is-modelled",
+    "title": "Data & Methods",
+    "section": "How the network is modelled",
+    "text": "How the network is modelled\nThe graph is directed and weighted. An edge i→j carries value_kusd, the exports from i to j. So a node’s out-strength is its total exports and its in-strength its total imports. The result is a complete digraph: every economy trades with every other, giving 1,190 edges at density 1.0. That single property drives most of what follows.\n\nBetweenness needs a distance, not a capacity\nTrade value is a capacity — a bigger number means two economies are more strongly connected, i.e. closer. Shortest-path algorithms want the opposite: a cost, where bigger means further apart. Passing value_kusd straight into betweenness would therefore route every path through the weakest links and invert the result.\nWeighted betweenness here uses distance = 1 / value_kusd, so heavily-traded corridors are short and thin ones are long. Unweighted betweenness is reported alongside it as the pure-topology view — and on a complete digraph it is identically zero, because every pair is already adjacent and no node ever lies on a shortest path.\nEigenvector centrality and PageRank use value_kusd directly as the weight, since those measures want a strength, not a distance.\n\n\nThe backbone, not a power law\nBecause the graph is dense, the scale-free and small-world framing that suits sparse networks does not apply, and no power law is fitted to the strength distribution. Where a sparse object is genuinely needed — for community detection and for asking whether the network can fragment — we extract the statistically significant backbone with the disparity filter (Serrano, Boguñá & Vespignani, PNAS 2009).\nThe filter asks, for each economy separately, whether a given link carries a significantly larger share of that economy’s trade than a random allocation of its total across its partners would produce. Links that survive at α = 0.05 are the ones that matter to at least one of their two endpoints. This keeps 184 of 1,190 edges — a network that is still connected but now has structure to find.\n\n\nCommunities\nLouvain runs on an undirected, weighted projection: the i→j and j→i values are summed into one edge, so a bilateral relationship is a single weighted link. It is run on both the full graph and the backbone, and the partition with the higher modularity Q is kept.\n\n\nResilience\nEconomies are removed one at a time, tracking two quantities after each removal: the largest weakly-connected component as a share of surviving economies, and the share of the original trade value still carried inside that component. Value stranded in a splinter component counts as lost.\nTargeted removal takes hubs first, by out-strength and then by weighted betweenness, with both rankings fixed on the intact network rather than recomputed as it degrades. Random failure is the mean of 20 seeded runs, shown with a ±1 sd band. The critical fraction is the first removal share at which the largest component stops holding half the surviving economies.\n\n\nReproducibility\nEvery stochastic step — Louvain, the random-failure runs, network layouts — is seeded from config.RANDOM_SEED, so re-running the notebooks reproduces the published numbers exactly.",
+    "crumbs": [
+      "Overview",
+      "Data & Methods"
+    ]
+  },
+  {
+    "objectID": "data.html#caveats-worth-reading-before-the-results",
+    "href": "data.html#caveats-worth-reading-before-the-results",
+    "title": "Data & Methods",
+    "section": "Caveats worth reading before the results",
+    "text": "Caveats worth reading before the results\n2022 is not a neutral year. It is the energy-crisis year and the first year of large-scale sanctions on Russia. BACI values are current USD, so the energy subnetwork’s share of total value reflects prices as much as volumes, and Russia still tops the 2022 energy table despite sanctions that were only partly in force during it.\nThe node set is a frame, and for energy a tight one. Only 48% of these economies’ energy imports originate inside the node set, against 65% for merchandise. Europe’s crude and LNG largely come from the Gulf, Kazakhstan, and North and West Africa — none of which are nodes here. The energy graph therefore describes how energy is redistributed within Europe, not where it comes from.\nCustoms data misattributes pipeline gas. A flow is recorded against the declared consignment partner, so gas crossing trading hubs lands on the wrong edge. In this data Austria looks like a net gas exporter in 2022, which it certainly was not. Treat trade data as evidence about value routed, and use physical flow data for questions about dependence.",
+    "crumbs": [
+      "Overview",
+      "Data & Methods"
+    ]
+  },
+  {
+    "objectID": "data.html#licence-and-citation",
+    "href": "data.html#licence-and-citation",
+    "title": "Data & Methods",
+    "section": "Licence and citation",
+    "text": "Licence and citation\nBACI is distributed under the Etalab Open Licence 2.0 — any use is permitted with attribution, which is why this repository points at CEPII rather than redistributing the files.\n\nGaulier, G. & Zignago, S. (2010). BACI: International Trade Database at the Product-Level. CEPII Working Paper N°2010-23.",
+    "crumbs": [
+      "Overview",
+      "Data & Methods"
+    ]
+  },
+  {
+    "objectID": "index.html",
+    "href": "index.html",
+    "title": "European Trade Network",
+    "section": "",
+    "text": "Which economies hold European trade together, do coherent blocs emerge from the flow structure, and how much of Europe’s trade survives losing its biggest hubs? This project models countries as nodes and directed, weighted trade flows as edges across the EU-27 and eight major partners — 35 economies, 9,755 bn USD of merchandise trade in 2022 — with Austria as a running reference point.\nOne fact shapes every result below: the network is complete. All 35 economies trade directly with all others, so density is 1.0 and there is no missing link to find. The structure that matters is not which connections exist, but how lopsidedly value sits on them.",
+    "crumbs": [
+      "Overview"
+    ]
+  },
+  {
+    "objectID": "index.html#what-the-analysis-found",
+    "href": "index.html#what-the-analysis-found",
+    "title": "European Trade Network",
+    "section": "What the analysis found",
+    "text": "What the analysis found\nRQ1 — Germany holds the network together, and Austria bridges nothing. Weighted betweenness is extraordinarily concentrated: Germany scores 0.829 against China’s 0.191, even though China exports more (1,654 bn vs 1,354 bn USD). China is a source; Germany is a hub. Only 15 of 35 economies have positive betweenness at all, because on a complete graph most pairs already trade directly. Austria sits among the twenty zeros — 17th by export strength, 13th by PageRank, a mid-tier economy whose largest partner is Germany in both directions. → 02 · Centrality\nRQ2 — Three blocs emerge, drawn by geography rather than treaty. Weighted Louvain on the significant-trade backbone finds 3 communities at modularity Q = 0.25: a German-anchored continental core, a Nordic-Baltic cluster, and an extra-European partner bloc. The EU-27 does not form a bloc — it splits across all three. Non-members Switzerland and Norway sit inside their neighbouring EU clusters, while EU-member Ireland defects to the US-led group, its exports dominated by US-linked pharma and tech. → 03 · Communities · interactive view\nRQ3 — Connectivity never breaks; value breaks almost immediately. The complete graph has no articulation point, so it cannot fragment. On the backbone it can: betweenness-targeted removal breaks it after 34% of economies (12 of 35), export targeting after 40%, against 89% under random failure — roughly 2.6× more tolerant of accidents than of a hit list. Value is the real fragility. Losing three economies (China, Germany, the USA — 9% of nodes) halves total trade value, where random failure needs ten. Germany alone carries 27%. → 04 · Resilience\nRQ4 — Energy is 12% of the value and a structurally different market. The top three energy exporters (Russia, Norway, the USA) carry 55% of energy exports against 38% for merchandise overall — a Herfindahl index of 0.124 vs 0.075, meaning 8 effective suppliers instead of 13. The leadership changes hands completely, because manufacturing hubs cannot sell resources they do not have. Austria is 12th by energy exports and a net importer, its exports being re-exports and transit (53% electricity). Electricity is also the bridge to the sibling project austria-energy-analysis, which measures the same Austrian flows hourly from ENTSO-E. → 05 · Energy subnetwork",
+    "crumbs": [
+      "Overview"
+    ]
+  },
+  {
+    "objectID": "index.html#three-takeaways",
+    "href": "index.html#three-takeaways",
+    "title": "European Trade Network",
+    "section": "Three takeaways",
+    "text": "Three takeaways\n\nThis network has no structural weak point — it has a value weak point. Every economy trades directly with every other, so nothing fragments by cutting links. But three economies carry half the value. Resilience policy that adds redundant connections is solving a problem this network does not have; diversifying volume away from the top handful of partners is the only lever that moves the number.\nTrade blocs are drawn by geography and intensity, not by treaty. The EU-27 splits across all three detected communities, non-members sit inside EU clusters, and an EU member defects to the US-led bloc. To predict who trades with whom, distance and volume beat membership.\nPosition and size are different things, and energy proves it twice. Germany out-bridges China on a quarter of its export volume, and Greece and Lithuania reach the betweenness top ten on 37 bn USD of exports each. In energy the ranking inverts entirely: resource exporters replace manufacturing hubs, concentration nearly doubles, and Austria rises five places on exports it does not produce but merely routes.",
+    "crumbs": [
+      "Overview"
+    ]
+  },
+  {
+    "objectID": "notebooks/01_data_and_graph.html",
+    "href": "notebooks/01_data_and_graph.html",
+    "title": "01 · Data & graph construction",
+    "section": "",
+    "text": "Builds the bilateral edge list for config.YEAR from the raw BACI files, turns it into the directed weighted graph that every later notebook rebuilds, stores nodes and edges in DuckDB, and draws the flow map.\nThe source, node set, and modelling decisions are on the Data & method page.\nShow code\nfrom __future__ import annotations\n\nimport pandas as pd\n\nfrom eu_trade_network import config, data_loader, db, graph, viz",
+    "crumbs": [
+      "Overview",
+      "Analysis",
+      "01 · Data & graph"
+    ]
+  },
+  {
+    "objectID": "notebooks/01_data_and_graph.html#edge-list-directed-graph",
+    "href": "notebooks/01_data_and_graph.html#edge-list-directed-graph",
+    "title": "01 · Data & graph construction",
+    "section": "Edge list + directed graph",
+    "text": "Edge list + directed graph\nBuild the bilateral edge list for config.YEAR, construct the directed weighted graph, and print a headline summary.\n\n\nShow code\nedgelist = data_loader.build_edgelist()\nG = graph.build_graph(edgelist)\nsummary = graph.graph_summary(G)\nsummary",
+    "crumbs": [
+      "Overview",
+      "Analysis",
+      "01 · Data & graph"
+    ]
+  },
+  {
+    "objectID": "notebooks/01_data_and_graph.html#persist-nodes-edges-in-duckdb",
+    "href": "notebooks/01_data_and_graph.html#persist-nodes-edges-in-duckdb",
+    "title": "01 · Data & graph construction",
+    "section": "Persist nodes + edges in DuckDB",
+    "text": "Persist nodes + edges in DuckDB\n\n\nShow code\nnode_meta = (\n    pd.DataFrame([{\"iso3\": n, **attrs} for n, attrs in G.nodes(data=True)])\n    .sort_values(\"iso3\")\n    .reset_index(drop=True)\n)\n\nnode_meta[\"out_strength\"] = [float(G.out_degree(n, weight=\"weight\")) for n in node_meta[\"iso3\"]]\nnode_meta[\"in_strength\"] = [float(G.in_degree(n, weight=\"weight\")) for n in node_meta[\"iso3\"]]\nnode_meta[\"degree\"] = [int(G.degree(n)) for n in node_meta[\"iso3\"]]\n\nedges_db = edgelist.copy()\nedges_db[\"year\"] = config.YEAR\n\ncon = db.connect()\ndb.init_schema(con)\ndb.write_table(\n    con,\n    \"nodes\",\n    node_meta[[\"iso3\", \"name\", \"grp\", \"out_strength\", \"in_strength\", \"degree\"]],\n)\ndb.write_table(con, \"edges\", edges_db[[\"exporter_iso3\", \"importer_iso3\", \"value_kusd\", \"year\"]])\n\nprint(f\"Wrote {len(node_meta)} nodes and {len(edges_db)} edges → {config.DB_PATH}\")\ncon.close()",
+    "crumbs": [
+      "Overview",
+      "Analysis",
+      "01 · Data & graph"
+    ]
+  },
+  {
+    "objectID": "notebooks/01_data_and_graph.html#flow-map-hero-figure",
+    "href": "notebooks/01_data_and_graph.html#flow-map-hero-figure",
+    "title": "01 · Data & graph construction",
+    "section": "Flow map (hero figure)",
+    "text": "Flow map (hero figure)\n\n\nShow code\n# Cartesian lon/lat map is kaleido-safe (no Plotly topojson CDN) and matches\n# the dark Quarto theme used for headline PNGs.\nfig = viz.plot_lonlat_flows(\n    edgelist,\n    node_meta,\n    top_n=150,\n    title=f\"European merchandise trade flows {config.YEAR} (top 150 edges)\",\n)\nout = viz.save_fig(fig, \"01_flow_map.png\", headline=True)\nprint(f\"Saved {out}\")\nfig.show()",
+    "crumbs": [
+      "Overview",
+      "Analysis",
+      "01 · Data & graph"
+    ]
+  },
+  {
+    "objectID": "notebooks/03_communities.html",
+    "href": "notebooks/03_communities.html",
+    "title": "03 · Trade communities (Louvain)",
+    "section": "",
+    "text": "RQ2 — do trade communities emerge, and do they follow geography? Runs weighted Louvain on the undirected projection of both the full graph and the backbone, keeps whichever partition is clearer, and maps the result.\nThe projection and the modularity criterion are described on the Data & method page. The partition found here is also browsable as an interactive network.\nShow code\nfrom __future__ import annotations\n\nimport pandas as pd\n\nfrom eu_trade_network import communities, config, data_loader, db, graph, metrics, viz",
+    "crumbs": [
+      "Overview",
+      "Analysis",
+      "03 · Communities (RQ2)"
+    ]
+  },
+  {
+    "objectID": "notebooks/03_communities.html#graph-undirected-projections",
+    "href": "notebooks/03_communities.html#graph-undirected-projections",
+    "title": "03 · Trade communities (Louvain)",
+    "section": "Graph + undirected projections",
+    "text": "Graph + undirected projections\nRebuild the edge list / digraph for config.YEAR, compute centralities (for node strengths), and build the undirected-weighted projection plus its backbone counterpart.\n\n\nShow code\nedgelist = data_loader.build_edgelist()\nG = graph.build_graph(edgelist)\ncent = metrics.compute_centralities(G)\n\nnode_meta = (\n    pd.DataFrame([{\"iso3\": n, **attrs} for n, attrs in G.nodes(data=True)])\n    .sort_values(\"iso3\")\n    .reset_index(drop=True)\n)\nnodes_db = node_meta.merge(cent, on=\"iso3\", how=\"inner\")\n\nund_full = communities.to_undirected_weighted(G)\nbackbone = metrics.disparity_filter(G, alpha=config.DISPARITY_ALPHA)\nund_bb = communities.to_undirected_weighted(backbone)\nprint(\n    f\"Full projection: {und_full.number_of_nodes()} nodes, {und_full.number_of_edges()} edges; \"\n    f\"backbone projection: {und_bb.number_of_nodes()} nodes, {und_bb.number_of_edges()} edges\"\n)",
+    "crumbs": [
+      "Overview",
+      "Analysis",
+      "03 · Communities (RQ2)"
+    ]
+  },
+  {
+    "objectID": "notebooks/03_communities.html#detect-communities-full-graph-vs-backbone",
+    "href": "notebooks/03_communities.html#detect-communities-full-graph-vs-backbone",
+    "title": "03 · Trade communities (Louvain)",
+    "section": "Detect communities — full graph vs backbone",
+    "text": "Detect communities — full graph vs backbone\nRun weighted Louvain on both projections and keep the clearer result (higher modularity).\n\n\nShow code\npart_full = communities.detect_communities(und_full)\nmod_full = communities.modularity(und_full, part_full)\n\npart_bb = communities.detect_communities(und_bb)\nmod_bb = communities.modularity(und_bb, part_bb)\n\n# Keep the clearer partition: higher modularity = better-separated blocs.\nif mod_bb &gt;= mod_full:\n    chosen_name, undirected, partition, chosen_mod = \"backbone\", und_bb, part_bb, mod_bb\nelse:\n    chosen_name, undirected, partition, chosen_mod = \"full graph\", und_full, part_full, mod_full\n\nprint(f\"Full graph: {len(set(part_full.values()))} communities, Q = {mod_full:.4f}\")\nprint(f\"Backbone:   {len(set(part_bb.values()))} communities, Q = {mod_bb:.4f}\")\nprint(\n    f\"→ Keeping the {chosen_name} partition \"\n    f\"({len(set(partition.values()))} communities, Q = {chosen_mod:.4f}).\"\n)",
+    "crumbs": [
+      "Overview",
+      "Analysis",
+      "03 · Communities (RQ2)"
+    ]
+  },
+  {
+    "objectID": "notebooks/03_communities.html#persist-community-ids-in-duckdb",
+    "href": "notebooks/03_communities.html#persist-community-ids-in-duckdb",
+    "title": "03 · Trade communities (Louvain)",
+    "section": "Persist community ids in DuckDB",
+    "text": "Persist community ids in DuckDB\nWrite the chosen community assignment (plus refreshed centralities) into the nodes table.\n\n\nShow code\nnodes_db[\"community\"] = [int(partition[i]) for i in nodes_db[\"iso3\"]]\n\ncon = db.connect()\ndb.init_schema(con)\ndb.write_table(\n    con,\n    \"nodes\",\n    nodes_db[\n        [\n            \"iso3\",\n            \"name\",\n            \"grp\",\n            \"out_strength\",\n            \"in_strength\",\n            \"degree\",\n            \"betweenness\",\n            \"betweenness_u\",\n            \"eigenvector\",\n            \"pagerank\",\n            \"community\",\n        ]\n    ],\n)\n\n# Keep edges in sync if earlier notebooks have not been run in this environment.\nedges_db = edgelist.copy()\nedges_db[\"year\"] = config.YEAR\ndb.write_table(con, \"edges\", edges_db[[\"exporter_iso3\", \"importer_iso3\", \"value_kusd\", \"year\"]])\nprint(f\"Wrote community ids for {len(nodes_db)} nodes → {config.DB_PATH}\")",
+    "crumbs": [
+      "Overview",
+      "Analysis",
+      "03 · Communities (RQ2)"
+    ]
+  },
+  {
+    "objectID": "notebooks/03_communities.html#community-summary-rq2",
+    "href": "notebooks/03_communities.html#community-summary-rq2",
+    "title": "03 · Trade communities (Louvain)",
+    "section": "Community summary (RQ2)",
+    "text": "Community summary (RQ2)\nSize, members, and total exports per community, straight from SQL.\n\n\nShow code\ncommunity_tbl = db.read_sql(con, config.SQL_DIR / \"queries\" / \"02_community_summary.sql\")\ncommunity_tbl",
+    "crumbs": [
+      "Overview",
+      "Analysis",
+      "03 · Communities (RQ2)"
+    ]
+  },
+  {
+    "objectID": "notebooks/03_communities.html#geographic-map-coloured-by-community",
+    "href": "notebooks/03_communities.html#geographic-map-coloured-by-community",
+    "title": "03 · Trade communities (Louvain)",
+    "section": "Geographic map coloured by community",
+    "text": "Geographic map coloured by community\nNodes at lon/lat, coloured by Louvain community and sized by export strength; faint lines show the backbone so the blocs are readable against geography.\n\n\nShow code\nbb_edges = pd.DataFrame(\n    [\n        {\"exporter_iso3\": u, \"importer_iso3\": v, \"value_kusd\": float(d[\"weight\"])}\n        for u, v, d in backbone.edges(data=True)\n    ]\n)\n\nfig_comm = viz.plot_community_map(\n    nodes_db,\n    partition,\n    edgelist=bb_edges,\n    title=(\n        f\"European trade communities — Louvain on the {chosen_name} \"\n        f\"(K={len(set(partition.values()))}, Q={chosen_mod:.3f})\"\n    ),\n)\nout = viz.save_fig(fig_comm, \"03_community_map.png\", headline=True)\nprint(f\"Saved {out}\")\nfig_comm.show()",
+    "crumbs": [
+      "Overview",
+      "Analysis",
+      "03 · Communities (RQ2)"
+    ]
+  },
+  {
+    "objectID": "notebooks/03_communities.html#interactive-network",
+    "href": "notebooks/03_communities.html#interactive-network",
+    "title": "03 · Trade communities (Louvain)",
+    "section": "Interactive network",
+    "text": "Interactive network\nWrite the PyVis HTML used by the site’s interactive network page (node size ∝ strength, colour = community, edge width ∝ bilateral value). Explore it there rather than here.\n\n\nShow code\n# Short, data-driven legend labels: name each bloc after its largest exporter.\nstrength_by_iso = dict(zip(nodes_db[\"iso3\"], nodes_db[\"out_strength\"], strict=True))\nmembers_by_comm: dict[int, list[str]] = {}\nfor iso, comm in partition.items():\n    members_by_comm.setdefault(int(comm), []).append(iso)\ncommunity_labels = {\n    comm: (\n        f\"{max(members, key=lambda i: strength_by_iso.get(i, 0.0))}-led bloc \"\n        f\"({len(members)} economies)\"\n    )\n    for comm, members in members_by_comm.items()\n}\n\nk = len(set(partition.values()))\nhtml_path = config.PROJECT_ROOT / \"network_viz\" / \"03_trade_communities.html\"\nviz.plot_network_pyvis(\n    undirected,\n    partition,\n    html_path,\n    title=\"European trade communities\",\n    subtitle=f\"Weighted Louvain on the {chosen_name} · K={k} · modularity Q={chosen_mod:.3f}\",\n    community_labels=community_labels,\n)\nprint(f\"Wrote interactive network → {html_path}\")",
+    "crumbs": [
+      "Overview",
+      "Analysis",
+      "03 · Communities (RQ2)"
+    ]
+  },
+  {
+    "objectID": "notebooks/03_communities.html#do-the-blocs-follow-eu-membership-or-geography",
+    "href": "notebooks/03_communities.html#do-the-blocs-follow-eu-membership-or-geography",
+    "title": "03 · Trade communities (Louvain)",
+    "section": "Do the blocs follow EU membership or geography?",
+    "text": "Do the blocs follow EU membership or geography?\nThe paragraph below is generated from the chosen partition, so it always matches the run.\n\n\nShow code\nsummary_tbl = communities.community_summary(partition, nodes_db, undirected=undirected)\neu_set = set(config.EU27)\n\nfor _, row in summary_tbl.iterrows():\n    members = row[\"members\"].split(\", \")\n    n_eu = sum(m in eu_set for m in members)\n    print(\n        f\"Community {int(row['community'])}: {int(row['n_countries'])} economies, \"\n        f\"{n_eu} EU-27 — {row['members']}\"\n    )\n\neu_communities = {partition[c] for c in config.EU27 if c in partition}\nprint(\n    f\"\\nModularity Q = {chosen_mod:.3f} on the {chosen_name} — moderate but real community\\n\"\n    f\"structure for a densely integrated trade network. The EU-27 does NOT form a single\\n\"\n    f\"bloc: it splits across {len(eu_communities)} communities. Membership shows through\\n\"\n    f\"regionally — a large German-anchored continental core plus a Nordic-Baltic cluster —\\n\"\n    f\"but the partition tracks *geography and trade intensity*, not the EU border: non-members\\n\"\n    f\"Switzerland and Norway sit inside their neighbouring EU clusters, while EU-member\\n\"\n    f\"Ireland defects to the extra-European bloc built around the US, China and the UK\\n\"\n    f\"(its trade is dominated by US-linked pharma/tech). Blocs are geographic, not political.\"\n)\n\ncon.close()",
+    "crumbs": [
+      "Overview",
+      "Analysis",
+      "03 · Communities (RQ2)"
+    ]
+  },
+  {
+    "objectID": "notebooks/05_energy_subnetwork.html",
+    "href": "notebooks/05_energy_subnetwork.html",
+    "title": "05 · Energy subnetwork (HS-27)",
+    "section": "",
+    "text": "RQ4 — is energy trade a structurally different market? Same 35 economies, only HS chapter 27 (coal, crude, refined products, gas, electricity). Compare concentration, who leads, and where Austria sits against the all-merchandise network.\nWhy the node set is held fixed, and the caveats that matter for energy (2022 prices, suppliers outside the frame, pipeline-gas misattribution), are on the Data & method page.\nBridge. HS-2716 electrical energy is the customs view of the same physical flow that austria-energy-analysis measures hourly from ENTSO-E.\nShow code\nfrom __future__ import annotations\n\nimport textwrap\n\nimport pandas as pd\n\nfrom eu_trade_network import config, data_loader, energy, graph, viz\n\nFOCUS = \"AUT\"\nTOP_K = 3\nLABELS = (\"All merchandise\", \"Energy (HS-27)\")",
+    "crumbs": [
+      "Overview",
+      "Analysis",
+      "05 · Energy (RQ4)"
+    ]
+  },
+  {
+    "objectID": "notebooks/05_energy_subnetwork.html#two-networks-one-node-set",
+    "href": "notebooks/05_energy_subnetwork.html#two-networks-one-node-set",
+    "title": "05 · Energy subnetwork (HS-27)",
+    "section": "Two networks, one node set",
+    "text": "Two networks, one node set\nThe energy subgraph keeps every economy but only the HS-27 flows between them.\n\n\nShow code\nall_edges = data_loader.build_edgelist()\nenergy_edges = data_loader.build_edgelist(products=config.HS_ENERGY)\n\nG = graph.build_graph(all_edges)\nE = graph.build_graph(energy_edges)\n\nfor label, network in zip(LABELS, (G, E), strict=True):\n    stats = graph.graph_summary(network)\n    print(\n        f\"{label:&gt;16}: {int(stats['n_nodes'])} economies, {int(stats['n_edges']):&gt;5} links, \"\n        f\"density = {stats['density']:.2f}, \"\n        f\"{stats['total_value_kusd'] / 1e6:&gt;6,.0f} bn USD\"\n    )",
+    "crumbs": [
+      "Overview",
+      "Analysis",
+      "05 · Energy (RQ4)"
+    ]
+  },
+  {
+    "objectID": "notebooks/05_energy_subnetwork.html#comparison-table",
+    "href": "notebooks/05_energy_subnetwork.html#comparison-table",
+    "title": "05 · Energy subnetwork (HS-27)",
+    "section": "Comparison table",
+    "text": "Comparison table\nShares and ranks are computed the same way for both networks, so every row is like-for-like. The Herfindahl index is the sum of squared export shares; its reciprocal is the number of equal-sized exporters that would be as concentrated as what we observe.\n\n\nShow code\ncomparison = energy.comparison_table(G, E, focus_iso3=FOCUS, top_k=TOP_K, labels=LABELS)\ncomparison.style.hide(axis=\"index\")",
+    "crumbs": [
+      "Overview",
+      "Analysis",
+      "05 · Energy (RQ4)"
+    ]
+  },
+  {
+    "objectID": "notebooks/05_energy_subnetwork.html#the-figure-rq4-headline",
+    "href": "notebooks/05_energy_subnetwork.html#the-figure-rq4-headline",
+    "title": "05 · Energy subnetwork (HS-27)",
+    "section": "The figure (RQ4 headline)",
+    "text": "The figure (RQ4 headline)\nLeft: how fast cumulative export share piles up as you walk down the exporter ranking — the steeper curve is the more concentrated market. Right: each economy’s share of energy exports against its share of merchandise exports. The dotted diagonal is “energy share = merchandise share”, so everything above it is an economy that punches above its trade weight in energy.\n\n\nShow code\ntotal_shares = energy.trade_shares(G)\nenergy_shares = energy.trade_shares(E)\n\nfig = viz.plot_energy_comparison(\n    total_shares,\n    energy_shares,\n    focus_iso3=FOCUS,\n    top_k=TOP_K,\n    labels=LABELS,\n)\nout = viz.save_fig(fig, \"05_energy_subnetwork.png\", headline=True)\nprint(f\"Saved {out}\")\nfig.show()",
+    "crumbs": [
+      "Overview",
+      "Analysis",
+      "05 · Energy (RQ4)"
+    ]
+  },
+  {
+    "objectID": "notebooks/05_energy_subnetwork.html#what-the-chapter-is-made-of",
+    "href": "notebooks/05_energy_subnetwork.html#what-the-chapter-is-made-of",
+    "title": "05 · Energy subnetwork (HS-27)",
+    "section": "What the chapter is made of",
+    "text": "What the chapter is made of\nHS-27 is not one commodity. Splitting it by 4-digit heading shows what the network trades and what Austria — with no oil or gas of its own — buys and sells.\n\n\nShow code\nflows = energy.load_product_flows()\n\nnetwork_mix = energy.heading_composition(flows)\naut_imports_mix = energy.heading_composition(flows, iso3=FOCUS, direction=\"imports\")\naut_exports_mix = energy.heading_composition(flows, iso3=FOCUS, direction=\"exports\")\n\nmix = (\n    network_mix[[\"hs\", \"heading\", \"share\"]]\n    .rename(columns={\"share\": \"network\"})\n    .merge(\n        aut_imports_mix[[\"hs\", \"share\"]].rename(columns={\"share\": f\"{FOCUS} imports\"}),\n        on=\"hs\",\n        how=\"left\",\n    )\n    .merge(\n        aut_exports_mix[[\"hs\", \"share\"]].rename(columns={\"share\": f\"{FOCUS} exports\"}),\n        on=\"hs\",\n        how=\"left\",\n    )\n    .head(6)\n    .fillna(0.0)\n)\nmix.style.format(\n    {\"network\": \"{:.1%}\", f\"{FOCUS} imports\": \"{:.1%}\", f\"{FOCUS} exports\": \"{:.1%}\"}\n).hide(axis=\"index\")",
+    "crumbs": [
+      "Overview",
+      "Analysis",
+      "05 · Energy (RQ4)"
+    ]
+  },
+  {
+    "objectID": "notebooks/05_energy_subnetwork.html#austrias-energy-partners",
+    "href": "notebooks/05_energy_subnetwork.html#austrias-energy-partners",
+    "title": "05 · Energy subnetwork (HS-27)",
+    "section": "Austria’s energy partners",
+    "text": "Austria’s energy partners\nWho Austria buys HS-27 from and who it sells to, as a share of its own energy imports / exports inside this node set.\n\n\nShow code\ndef _partner_shares(edges: pd.DataFrame, side: str, partner: str) -&gt; pd.Series:\n    \"\"\"Partner shares of Austria's energy trade on one side of the edge.\"\"\"\n    own = edges.loc[edges[side] == FOCUS]\n    totals = own.groupby(partner)[\"value_kusd\"].sum().sort_values(ascending=False)\n    return totals / totals.sum()\n\n\nsuppliers = _partner_shares(energy_edges, \"importer_iso3\", \"exporter_iso3\")\ncustomers = _partner_shares(energy_edges, \"exporter_iso3\", \"importer_iso3\")\n\ntop_partners = pd.DataFrame(\n    {\n        \"rank\": range(1, 7),\n        \"supplier\": suppliers.index[:6],\n        \"share of AUT energy imports\": suppliers.to_numpy()[:6],\n        \"customer\": customers.index[:6],\n        \"share of AUT energy exports\": customers.to_numpy()[:6],\n    }\n).set_index(\"rank\")\ntop_partners.style.format(\n    {\"share of AUT energy imports\": \"{:.1%}\", \"share of AUT energy exports\": \"{:.1%}\"}\n)",
+    "crumbs": [
+      "Overview",
+      "Analysis",
+      "05 · Energy (RQ4)"
+    ]
+  },
+  {
+    "objectID": "notebooks/05_energy_subnetwork.html#what-the-node-set-does-not-see",
+    "href": "notebooks/05_energy_subnetwork.html#what-the-node-set-does-not-see",
+    "title": "05 · Energy subnetwork (HS-27)",
+    "section": "What the node set does not see",
+    "text": "What the node set does not see\nIntra-set import shares for merchandise vs energy (the blind spot quantified). The interpretation is on Data & method.\n\n\nShow code\nsourcing = energy.import_sourcing(focus_iso3=FOCUS, labels=LABELS)\nsourcing_view = sourcing.assign(\n    imports_world_bn=sourcing[\"imports_world_kusd\"] / 1e6,\n    imports_within_bn=sourcing[\"imports_within_kusd\"] / 1e6,\n)[[\"scope\", \"importer\", \"imports_world_bn\", \"imports_within_bn\", \"intra_share\"]]\nsourcing_view.style.format(\n    {\"imports_world_bn\": \"{:,.0f}\", \"imports_within_bn\": \"{:,.0f}\", \"intra_share\": \"{:.0%}\"}\n).hide(axis=\"index\")",
+    "crumbs": [
+      "Overview",
+      "Analysis",
+      "05 · Energy (RQ4)"
+    ]
+  },
+  {
+    "objectID": "notebooks/05_energy_subnetwork.html#what-this-means-rq4",
+    "href": "notebooks/05_energy_subnetwork.html#what-this-means-rq4",
+    "title": "05 · Energy subnetwork (HS-27)",
+    "section": "What this means (RQ4)",
+    "text": "What this means (RQ4)\nGenerated from the run above, so the numbers always match the tables and the figure.\n\n\nShow code\ntotal_conc = energy.concentration(total_shares, top_k=TOP_K)\nenergy_conc = energy.concentration(energy_shares, top_k=TOP_K)\ntotal_pos = energy.country_position(total_shares, FOCUS)\nenergy_pos = energy.country_position(energy_shares, FOCUS)\n\nn_nodes = int(energy_pos[\"n_economies\"])\ntotal_value = float(all_edges[\"value_kusd\"].sum())\nenergy_value = float(energy_edges[\"value_kusd\"].sum())\ntop_energy = \", \".join(energy_shares[\"iso3\"].head(TOP_K))\ntop_total = \", \".join(total_shares[\"iso3\"].head(TOP_K))\n\n\ndef _share(mix_frame: pd.DataFrame, hs: str) -&gt; float:\n    \"\"\"Share of one HS heading in a composition table (0.0 if absent).\"\"\"\n    row = mix_frame.loc[mix_frame[\"hs\"] == hs, \"share\"]\n    return float(row.iloc[0]) if len(row) else 0.0\n\n\ndef _value(mix_frame: pd.DataFrame, hs: str) -&gt; float:\n    \"\"\"Value (thousand USD) of one HS heading in a composition table.\"\"\"\n    row = mix_frame.loc[mix_frame[\"hs\"] == hs, \"value_kusd\"]\n    return float(row.iloc[0]) if len(row) else 0.0\n\n\nelec_network = _share(network_mix, \"2716\")\nelec_in, elec_out = _share(aut_imports_mix, \"2716\"), _share(aut_exports_mix, \"2716\")\ngas_out, refined_out = _share(aut_exports_mix, \"2711\"), _share(aut_exports_mix, \"2710\")\nelectricity = flows.loc[flows[\"hs\"] == \"2716\"]\nelec_customers = \", \".join(\n    electricity.loc[electricity[\"exporter_iso3\"] == FOCUS]\n    .groupby(\"importer_iso3\")[\"value_kusd\"]\n    .sum()\n    .sort_values(ascending=False)\n    .index[:4]\n)\ngas_in_bn = _value(aut_imports_mix, \"2711\") / 1e6\ngas_out_bn = _value(aut_exports_mix, \"2711\") / 1e6\nelec_in_bn = _value(aut_imports_mix, \"2716\") / 1e6\nelec_out_bn = _value(aut_exports_mix, \"2716\") / 1e6\nintra = sourcing.set_index([\"scope\", \"importer\"])[\"intra_share\"]\nnode_set = f\"{n_nodes}-economy set\"\n\nparagraphs = [\n    f\"A DIFFERENT MARKET. Energy is {energy_value / total_value:.0%} of the value in this \"\n    f\"network but a structurally different market. The top {TOP_K} exporters carry \"\n    f\"{energy_conc['top_k_share']:.0%} of energy exports ({top_energy}) against \"\n    f\"{total_conc['top_k_share']:.0%} for merchandise as a whole ({top_total}); the Herfindahl \"\n    f\"index is {energy_conc['hhi']:.3f} vs {total_conc['hhi']:.3f}, i.e. \"\n    f\"{energy_conc['effective_exporters']:.0f} effective suppliers instead of \"\n    f\"{total_conc['effective_exporters']:.0f}. The leaders change too: the manufacturing hubs \"\n    f\"that dominate merchandise trade cannot sell resources they do not have, so resource \"\n    f\"exporters take their place — Russia and Norway sit far above the diagonal in the \"\n    f\"right-hand panel, Germany and China well below it. \"\n    f\"Concentration, not connectivity, is again the risk — the energy graph is nearly complete \"\n    f\"(density {float(len(energy_edges)) / (n_nodes * (n_nodes - 1)):.2f}), so everyone trades \"\n    f\"with everyone; the volume just sits on very few sources.\",\n    f\"CAVEAT ON THE YEAR. {config.YEAR} is the energy-crisis year: BACI values are USD, so the \"\n    f\"energy subnetwork's {energy_value / total_value:.0%} value share reflects prices as much as \"\n    f\"volumes, and Russia still leads the {config.YEAR} table despite sanctions that were only \"\n    f\"partly in force. Read the concentration ranking as a snapshot of a market under stress, \"\n    f\"not a structural constant.\",\n    f\"AUSTRIA. Austria is {int(energy_pos['export_rank'])}th of {n_nodes} by energy exports \"\n    f\"({energy_pos['export_share']:.1%} of the network's energy) and \"\n    f\"{int(energy_pos['import_rank'])}th by energy imports — versus \"\n    f\"{int(total_pos['export_rank'])}th and {int(total_pos['import_rank'])}th for merchandise. \"\n    f\"It is a net energy importer ({energy_pos['net_export_kusd'] / 1e6:+,.1f} bn USD). The \"\n    f\"ranking flatters it: Austria produces almost no fossil fuel, so its energy exports are \"\n    f\"re-exports and transit — {elec_out:.0%} electricity, {gas_out:.0%} gas and \"\n    f\"{refined_out:.0%} refined products passed on to neighbours. Its imports are equally \"\n    f\"intermediated: {suppliers.iloc[0]:.0%} arrive from \"\n    f\"{suppliers.index[0]}, which is a routing fact, not a production one.\",\n    f\"THE FRAME MISSES THE REAL SUPPLIERS. Only {intra[(LABELS[1], node_set)]:.0%} of this node \"\n    f\"set's energy imports come from inside it, against \"\n    f\"{intra[(LABELS[0], node_set)]:.0%} for merchandise; for Austria it is \"\n    f\"{intra[(LABELS[1], FOCUS)]:.0%} vs {intra[(LABELS[0], FOCUS)]:.0%}. Europe's crude and LNG \"\n    f\"largely originate outside the 35 economies modelled here (the Gulf, Kazakhstan, North and \"\n    f\"West Africa). The energy subgraph therefore describes how energy is *redistributed* within \"\n    f\"Europe, not where it ultimately comes from — a full dependence analysis needs the world \"\n    f\"node set.\",\n    f\"PIPELINE GAS IS BADLY CAPTURED — DO NOT READ DEPENDENCE OFF IT. Austria's recorded HS-2711 \"\n    f\"(gas) imports inside this node set are only {gas_in_bn:,.1f} bn USD while its gas exports \"\n    f\"are {gas_out_bn:,.1f} bn, which would make Austria a net gas exporter in {config.YEAR}. It \"\n    f\"was not: it burned mostly Russian pipeline gas. Customs statistics attribute a flow to the \"\n    f\"declared consignment partner, so gas crossing hubs and traded contracts lands on the wrong \"\n    f\"edge. Treat merchandise data as evidence about *value routed*, and use physical flow data \"\n    f\"for dependence.\",\n    f\"BRIDGE TO austria-energy-analysis. Electricity (HS-2716) is {elec_network:.0%} of the \"\n    f\"energy network's value but {elec_out:.0%} of Austria's energy exports and \"\n    f\"{elec_in:.0%} of its energy imports — {elec_out_bn:,.1f} bn USD out against \"\n    f\"{elec_in_bn:,.1f} bn in, an almost perfectly balanced position with its neighbours \"\n    f\"({elec_customers}). That is the same physical flow the sibling project measures hourly \"\n    f\"from ENTSO-E: there, Austria's renewable share of electricity reaches 86% (2024), gas \"\n    f\"generation falls by a third, and each GW of wind+solar cuts the day-ahead price by \"\n    f\"14.3 EUR/MWh. Read together: this project locates Austria in Europe's energy exchange \"\n    f\"(mid-sized, intermediating, import-dependent), the other one explains what the exchange \"\n    f\"is for.\",\n]\nfor paragraph in paragraphs:\n    print(textwrap.fill(paragraph, width=94), end=\"\\n\\n\")",
+    "crumbs": [
+      "Overview",
+      "Analysis",
+      "05 · Energy (RQ4)"
+    ]
+  }
+]

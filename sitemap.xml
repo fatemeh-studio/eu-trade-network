@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+  <url>
+    <loc>https://fatemeh-studio.github.io/eu-trade-network/network.html</loc>
+    <lastmod>2026-07-25T17:58:55.997Z</lastmod>
+  </url>
+  <url>
+    <loc>https://fatemeh-studio.github.io/eu-trade-network/notebooks/04_resilience.html</loc>
+    <lastmod>2026-07-25T18:48:39.666Z</lastmod>
+  </url>
+  <url>
+    <loc>https://fatemeh-studio.github.io/eu-trade-network/notebooks/02_centrality_and_backbone.html</loc>
+    <lastmod>2026-07-25T18:47:48.920Z</lastmod>
+  </url>
+  <url>
+    <loc>https://fatemeh-studio.github.io/eu-trade-network/data.html</loc>
+    <lastmod>2026-07-25T17:58:55.983Z</lastmod>
+  </url>
+  <url>
+    <loc>https://fatemeh-studio.github.io/eu-trade-network/index.html</loc>
+    <lastmod>2026-07-25T17:58:55.997Z</lastmod>
+  </url>
+  <url>
+    <loc>https://fatemeh-studio.github.io/eu-trade-network/notebooks/01_data_and_graph.html</loc>
+    <lastmod>2026-07-25T18:47:19.816Z</lastmod>
+  </url>
+  <url>
+    <loc>https://fatemeh-studio.github.io/eu-trade-network/notebooks/03_communities.html</loc>
+    <lastmod>2026-07-25T18:48:13.718Z</lastmod>
+  </url>
+  <url>
+    <loc>https://fatemeh-studio.github.io/eu-trade-network/notebooks/05_energy_subnetwork.html</loc>
+    <lastmod>2026-07-25T18:49:47.663Z</lastmod>
+  </url>
+</urlset>

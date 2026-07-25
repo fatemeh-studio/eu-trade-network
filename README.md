@@ -5,7 +5,7 @@
 
 ![Bilateral merchandise trade flows between the EU-27 and eight major partners, 2022](figures/headline/01_flow_map.png)
 
-[![Live site](https://img.shields.io/badge/site-GitHub%20Pages-1f6feb)](https://fatemeh-studio.github.io/eu-trade-network/) —
+[![Live site](https://img.shields.io/badge/site-GitHub%20Pages-1f6feb)](https://fatemeh-studio.github.io/eu-trade-network/)
 findings, Data & method, executed analysis notebooks, and an interactive community
 network.
 

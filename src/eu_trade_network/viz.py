@@ -1406,9 +1406,187 @@ def plot_network_pyvis(
     out_html.write_text(html, encoding="utf-8")
 
 
-def plot_resilience(curves: pd.DataFrame) -> go.Figure:
-    """Targeted vs random removal curves (LCC fraction and trade retained)."""
-    raise NotImplementedError("TODO: implement in Cursor Prompt P5")
+# Removal strategies keep a fixed colour so figures are comparable across notebooks.
+_RESILIENCE_COLORS: dict[str, str] = {
+    "random": "#999999",  # grey
+    "targeted (out-strength)": "#E69F00",  # orange
+    "targeted (betweenness)": "#CC79A7",  # reddish purple
+}
+
+
+def _rgba(hex_color: str, alpha: float) -> str:
+    """Convert ``#rrggbb`` to an ``rgba(...)`` string with the given alpha."""
+    raw = hex_color.lstrip("#")
+    r, g, b = (int(raw[i : i + 2], 16) for i in (0, 2, 4))
+    return f"rgba({r},{g},{b},{alpha:.3f})"
+
+
+def plot_resilience(
+    curves: pd.DataFrame,
+    title: str | None = None,
+    lcc_level: float = 0.5,
+) -> go.Figure:
+    """Targeted vs random removal curves (LCC fraction and trade retained).
+
+    Two panels sharing the x axis (fraction of economies removed): the largest
+    weakly-connected component as a share of the *surviving* nodes, and the share of the
+    original trade value still carried inside that component. Where a strategy reports a
+    spread across seeded runs (``*_sd`` columns), a ±1 sd band is shaded.
+
+    Args:
+        curves: Long-form removal curves from
+            :func:`resilience.run_random_vs_targeted` — needs ``strategy``,
+            ``fraction_removed``, ``lcc_fraction``, ``trade_value_retained``; optional
+            ``lcc_fraction_sd`` / ``trade_value_retained_sd``.
+        title: Optional figure title.
+        lcc_level: Fragmentation level marked with a dotted reference line.
+
+    Returns:
+        Plotly figure ready for display or :func:`save_fig`.
+    """
+    required = {"strategy", "fraction_removed", "lcc_fraction", "trade_value_retained"}
+    missing = required - set(curves.columns)
+    if missing:
+        raise ValueError(f"curves missing columns: {sorted(missing)}")
+
+    fig_w, fig_h = 1180, 540
+    margin = {"l": 78, "r": 30, "t": 96, "b": 126}
+    # No subplot titles: the y-axis labels already name each panel, and dropping them
+    # leaves the top strip free for the legend.
+    fig = make_subplots(rows=1, cols=2, horizontal_spacing=0.10)
+
+    fig.add_trace(
+        go.Scatter(
+            x=[0.0, 1.0],
+            y=[lcc_level, lcc_level],
+            mode="lines",
+            line={"dash": "dot", "width": 1.2, "color": _MUTED},
+            showlegend=False,
+            hoverinfo="skip",
+        ),
+        row=1,
+        col=1,
+    )
+
+    panels = (
+        ("lcc_fraction", "lcc_fraction_sd"),
+        ("trade_value_retained", "trade_value_retained_sd"),
+    )
+    strategies = list(dict.fromkeys(curves["strategy"].astype(str)))
+    for idx, strategy in enumerate(strategies):
+        frame = curves.loc[curves["strategy"].astype(str) == strategy].sort_values(
+            "fraction_removed"
+        )
+        color = _RESILIENCE_COLORS.get(strategy, _COMMUNITY_COLORS[idx % len(_COMMUNITY_COLORS)])
+        x = frame["fraction_removed"].astype(float).to_numpy()
+
+        for col, (value_col, sd_col) in enumerate(panels, start=1):
+            y = frame[value_col].astype(float).to_numpy()
+            if sd_col in frame.columns:
+                sd = frame[sd_col].astype(float).fillna(0.0).to_numpy()
+                if float(sd.max()) > 0.0:
+                    for bound, fill in (
+                        ((y + sd).clip(max=1.0), None),
+                        ((y - sd).clip(min=0.0), "tonexty"),
+                    ):
+                        fig.add_trace(
+                            go.Scatter(
+                                x=x.tolist(),
+                                y=bound.tolist(),
+                                mode="lines",
+                                line={"width": 0.0, "color": "rgba(0,0,0,0)"},
+                                fill=fill,
+                                fillcolor=_rgba(color, 0.11),
+                                legendgroup=strategy,
+                                showlegend=False,
+                                hoverinfo="skip",
+                            ),
+                            row=1,
+                            col=col,
+                        )
+            fig.add_trace(
+                go.Scatter(
+                    x=x.tolist(),
+                    y=y.tolist(),
+                    mode="lines+markers",
+                    name=strategy,
+                    legendgroup=strategy,
+                    showlegend=bool(col == 1),
+                    line={"width": 2.2, "color": color},
+                    marker={"size": 4, "color": color},
+                    hovertemplate=(
+                        f"{strategy}<br>removed=%{{x:.0%}}<br>{value_col}=%{{y:.1%}}<extra></extra>"
+                    ),
+                ),
+                row=1,
+                col=col,
+            )
+
+    for col, label in enumerate(
+        (
+            "Largest connected component (share of survivors)",
+            "Trade value retained inside it (share of original)",
+        ),
+        start=1,
+    ):
+        # Both axes are percentages starting at zero, so their "0%" labels would collide
+        # in the corner. Only the y axis prints it; it reads as the origin for both.
+        fig.update_xaxes(
+            **_axis_dark(
+                title_text="Fraction of economies removed",
+                range=[0.0, 1.0],
+                tickformat=".0%",
+                tickvals=[0.2, 0.4, 0.6, 0.8, 1.0],
+            ),
+            row=1,
+            col=col,
+        )
+        fig.update_yaxes(
+            **_axis_dark(
+                title_text=label,
+                range=[0.0, 1.05],
+                tickformat=".0%",
+                tickvals=[0.0, 0.2, 0.4, 0.6, 0.8, 1.0],
+            ),
+            row=1,
+            col=col,
+        )
+
+    fig.update_layout(
+        **_dark_layout(
+            title={
+                "text": title or "Network resilience — targeted attack vs random failure",
+                "x": 0.01,
+                "xanchor": "left",
+                "font": {"size": _FS_TITLE, "color": _INK},
+            },
+            height=fig_h,
+            width=fig_w,
+            margin=margin,
+            showlegend=True,
+        )
+    )
+    fig.add_annotation(
+        x=0.02,
+        y=lcc_level,
+        xref="x",
+        yref="y",
+        text=f"fragmentation level ({lcc_level:.0%})",
+        showarrow=False,
+        xanchor="left",
+        yanchor="bottom",
+        font={"size": _FS_FOOT, "color": _MUTED},
+    )
+    fig.add_annotation(
+        **_footnote(
+            "Economies removed one at a time · targeted rankings fixed on the intact network · "
+            "random = mean of seeded runs (shaded ±1 sd)<br>"
+            "The component share is measured against surviving economies, so it rebounds once "
+            "only a handful of isolated economies are left.",
+            y=-0.30,
+        )
+    )
+    return fig
 
 
 def save_fig(

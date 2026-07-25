@@ -9,7 +9,7 @@ Status: ⬜ todo · 🟡 in progress · ✅ done
 - ✅ **P2** `graph.py` + `db.py` + `schema.sql` → **NB01** graph + hero flow map
 - ✅ **P3** `metrics.py` (centrality, backbone, rich-club) → **NB02** rankings (Austria)
 - ✅ **P4** `communities.py` → **NB03** Louvain blocs + geo map + PyVis
-- ⬜ **P5** `resilience.py` → **NB04** targeted vs random + critical threshold
+- ✅ **P5** `resilience.py` → **NB04** targeted vs random + critical threshold
 - ⬜ **P6** *(optional)* **NB05** energy (HS-27) subnetwork — bridge to energy project
 - ⬜ **P7** `index.qmd` report + README findings + headline figures + `v0.1.0` tag
 
@@ -28,7 +28,16 @@ Status: ⬜ todo · 🟡 in progress · ✅ done
   GBR, TUR + IRL). The EU-27 splits across all three; non-members CHE/NOR sit inside
   EU clusters while EU-member Ireland defects to the US-led bloc
   (`figures/headline/03_community_map.png`, `network_viz/03_trade_communities.html`).
-- RQ3 resilience (critical fraction): …
+- RQ3 resilience (critical fraction): Connectivity is **not** the weak point — the full
+  graph is complete (density = 1), so it never fragments; the informative object is the
+  disparity-filter backbone. There the **critical fraction is 34%** (12 of 35 economies)
+  under betweenness-targeted removal and **40%** (14) under export-strength targeting,
+  versus **89%** (31) under random failure — ≈2.6× more tolerant of accidents than of a
+  targeted hit list; bridge economies bite ~2 economies sooner than big exporters. Value
+  is far more fragile than topology: losing **3 economies (CHN, DEU, USA — 9% of nodes)
+  halves total trade value**, while random failure needs 10 (29%). Germany alone carries
+  27% of network value, China 25%, Austria 4.0% (17th by export volume, not a chokepoint)
+  (`figures/headline/04_resilience.png`, `figures/qa/04_resilience_full_graph.png`).
 - RQ4 energy subnetwork: …
 
 ## Decisions log
@@ -38,4 +47,5 @@ Status: ⬜ todo · 🟡 in progress · ✅ done
   framing (that framing belongs to the sibling air-transport project).
 
 ## Current next step
-> Run **P5** from `docs/CURSOR_PROMPTS.md`.
+> Run **P6** (optional energy subnetwork) or skip straight to **P7** from
+> `docs/CURSOR_PROMPTS.md`.

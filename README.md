@@ -31,9 +31,13 @@ non-members Switzerland and Norway sit inside their neighbouring EU clusters, an
 Ireland joins the US-led bloc (its exports are dominated by US-linked pharma/tech).
 
 **RQ3 — How resilient is the network to hub failure?**
-[FILL: e.g. "Removing the top N economies by strength fragments the network after X% of
-nodes, versus Y% under random failure — the signature vulnerability of a hub-dominated
-trade system."]
+Connectivity is not the weak point: the full graph is complete (density = 1) and never
+fragments. On the significant-trade backbone it does — targeted removal by betweenness
+breaks it after **34% of economies (12 of 35)**, by export strength after **40% (14)**,
+versus **89% (31)** under random failure, so the network is ≈2.6× more tolerant of accidents
+than of a deliberate hit list. **Value is far more fragile than topology**: losing just
+**three economies (China, Germany, the USA — 9% of nodes) halves total trade value**, while
+random failure needs ten (29%). Germany alone carries 27% of the network's trade value.
 
 **RQ4 (optional) — Energy trade (HS-27) vs total trade**
 [FILL: e.g. "The energy-commodity subnetwork is more concentrated: the top 3 exporters

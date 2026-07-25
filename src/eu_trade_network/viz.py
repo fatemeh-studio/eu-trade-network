@@ -1197,6 +1197,7 @@ _PYVIS_UI_CSS = """
   border: 1px solid rgba(255,255,255,0.18); border-radius: 6px; padding: 6px 10px;
   font-size: 12px; cursor: pointer; font-family: inherit; text-align: left; }
 #eutn-controls button:hover { background: #2a2f3a; border-color: #56B4E9; }
+#eutn-panel.eutn-hidden, #eutn-legend.eutn-hidden { display: none; }
 </style>
 """
 
@@ -1246,6 +1247,24 @@ _PYVIS_UI_SCRIPT = """
       nodes.update(upd);
       labelsBtn.textContent = labelsOn ? "Hide labels" : "Show labels";
     };
+    var infoOn = false;
+    var infoBtn = document.getElementById("eutn-info");
+    var panel = document.getElementById("eutn-panel");
+    var legend = document.getElementById("eutn-legend");
+    panel.classList.add("eutn-hidden");
+    legend.classList.add("eutn-hidden");
+    infoBtn.textContent = "Show info";
+    infoBtn.onclick = function () {
+      infoOn = !infoOn;
+      if (infoOn) {
+        panel.classList.remove("eutn-hidden");
+        legend.classList.remove("eutn-hidden");
+      } else {
+        panel.classList.add("eutn-hidden");
+        legend.classList.add("eutn-hidden");
+      }
+      infoBtn.textContent = infoOn ? "Hide info" : "Show info";
+    };
   }
   if (document.readyState === "complete") { ready(); }
   else { window.addEventListener("load", ready); }
@@ -1279,19 +1298,21 @@ def _pyvis_overlay_html(
     legend_rows = "\n      ".join(rows)
 
     return f"""
-<div id="eutn-panel">
+<div id="eutn-panel" class="eutn-hidden">
   <h1>{title}</h1>
   <div class="sub">{subtitle}</div>
   <div class="desc">{description}</div>
   <div class="tips">Hover a node for country details &middot; drag nodes to rearrange &middot;
-    scroll to zoom &middot; use the buttons (top-right) to freeze the layout or refit.</div>
+    scroll to zoom &middot; use the buttons (top-right) to freeze the layout, toggle
+    labels, or show this panel and the legend.</div>
 </div>
 <div id="eutn-controls">
   <button id="eutn-freeze">Freeze layout</button>
   <button id="eutn-fit">Fit to screen</button>
   <button id="eutn-labels">Hide labels</button>
+  <button id="eutn-info">Show info</button>
 </div>
-<div id="eutn-legend">
+<div id="eutn-legend" class="eutn-hidden">
   <div class="cap">Trade communities</div>
   {legend_rows}
   <hr>

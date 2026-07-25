@@ -18,6 +18,9 @@ network_viz/
 /_site/
 /.quarto/
 *_files/
+# Executed-notebook cache: holds cell outputs, so keep it out of git for the same
+# reason notebook outputs are stripped (see .gitattributes / nbstripout).
+/_freeze/
 
 # Python
 __pycache__/

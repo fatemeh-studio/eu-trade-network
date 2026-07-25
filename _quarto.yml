@@ -2,28 +2,70 @@ project:
   type: website
   output-dir: _site
   render:
-    # Only the report is a site page; AGENTS.md / PROGRESS.md / docs/ are repo docs.
+    # Site pages only. AGENTS.md / PROGRESS.md / docs/ / data/README.md are repo
+    # docs and must not be picked up as website pages.
+    # Notebooks before network.qmd so NB03 can write network_viz/ first.
     - index.qmd
+    - data.qmd
+    - notebooks/*.ipynb
+    - network.qmd
   resources:
     # Interactive PyVis network (built by notebooks/03_communities.ipynb) copied
-    # verbatim into the rendered site.
+    # verbatim into the rendered site. Not committed — produced by a local NB03 run
+    # (or by this render when notebooks execute).
     - network_viz/
 
 website:
   title: "European Trade Network"
+  description: "Centrality, communities, and resilience in European merchandise trade."
+  favicon: figures/headline/01_flow_map.png
+  page-navigation: true
   navbar:
     left:
       - href: index.qmd
         text: Overview
-      - href: network_viz/03_trade_communities.html
+      - href: data.qmd
+        text: Data & Methods
+      - href: network.qmd
         text: Interactive network
-        target: _blank
+    right:
+      - icon: github
+        href: https://github.com/fatemeh-studio/eu-trade-network
+        aria-label: Source on GitHub
+  sidebar:
+    style: docked
+    search: true
+    contents:
+      - href: index.qmd
+        text: Overview
+      - href: data.qmd
+        text: Data & Methods
+      - section: "Analysis"
+        contents:
+          - href: notebooks/01_data_and_graph.ipynb
+            text: "01 · Data & graph"
+          - href: notebooks/02_centrality_and_backbone.ipynb
+            text: "02 · Centrality (RQ1)"
+          - href: notebooks/03_communities.ipynb
+            text: "03 · Communities (RQ2)"
+          - href: notebooks/04_resilience.ipynb
+            text: "04 · Resilience (RQ3)"
+          - href: notebooks/05_energy_subnetwork.ipynb
+            text: "05 · Energy (RQ4)"
+      - href: network.qmd
+        text: Interactive network
+  page-footer:
+    left: "Data: CEPII BACI (Etalab Open Licence 2.0) · Code: MIT"
+    right: "[Source on GitHub](https://github.com/fatemeh-studio/eu-trade-network)"
 
 format:
   html:
     theme: darkly
     toc: true
+    toc-depth: 3
+    # Notebook code is available but folded away, so pages read as a report.
     code-fold: true
+    code-summary: "Show code"
     fig-width: 9
     fig-height: 6
 

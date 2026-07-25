@@ -1,0 +1,29 @@
+---
+title: "Interactive network"
+subtitle: "The trade graph as a live, weighted Louvain community view"
+---
+
+Same Louvain partition as [03 · Communities](notebooks/03_communities.ipynb), as a
+force-directed graph.
+
+**Read.** Colour = community (continental core / Nordic-Baltic / extra-European partners).
+Size ∝ total trade strength. Edge width ∝ summed bilateral value.
+
+**Use.** Hover for figures, drag to pull a bloc apart, scroll to zoom; on-canvas buttons
+freeze, refit, or toggle labels. Layout seeded from `config.RANDOM_SEED`.
+
+```{=html}
+<iframe src="network_viz/03_trade_communities.html" title="Interactive European trade communities"
+        style="width:100%; height:78vh; min-height:560px; border:1px solid rgba(255,255,255,0.15); border-radius:8px;"
+        loading="lazy"></iframe>
+```
+
+[Open full screen in a new tab →](network_viz/03_trade_communities.html){target="_blank"}
+
+::: {.callout-tip collapse="true"}
+## Why the blocs are not the EU
+
+The partition splits the EU-27 across all three communities, places non-members
+Switzerland and Norway inside EU clusters, and sends EU-member Ireland into the US-led
+bloc. The reasoning is in [03 · Communities](notebooks/03_communities.ipynb).
+:::

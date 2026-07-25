@@ -1,0 +1,139 @@
+---
+title: "Data & Methods"
+subtitle: "What the network is built from, and the modelling choices behind it"
+---
+
+This page is the single reference for the data source and the analytical decisions. The
+[analysis notebooks](notebooks/01_data_and_graph.ipynb) assume it rather than restating it.
+
+## Source — CEPII BACI
+
+**BACI** is CEPII's harmonised bilateral trade database, reconstructed from UN Comtrade
+with the mirror-flow discrepancies between what an exporter declares and what the importer
+records reconciled into a single value per flow. It covers 200+ countries at HS-6 product
+level and is the standard source for academic trade-network work.
+
+It was chosen over two alternatives. The **UN Comtrade** API needs a registered key and
+caps rows per call on the free tier, so a full bilateral matrix takes many paginated
+requests. **Eurostat Comext** is EU-reporter-centric, so flows between two non-EU partners
+are thin — that asymmetry would distort a network where the partners are nodes in their own
+right.
+
+Each row of the raw file is one exporter × importer × product × year observation. Two
+column facts matter analytically:
+
+- `v` — trade value in **thousands of current USD**. Everything in this project is value,
+  never volume.
+- `q` — quantity in metric tons, **missing in roughly 2% of rows**. It is not used anywhere.
+
+Raw files are not committed. See [`data/README.md`](https://github.com/fatemeh-studio/eu-trade-network/blob/main/data/README.md)
+in the repository for the one-time download.
+
+## Scope — the node set
+
+```{python}
+#| echo: false
+#| output: asis
+from eu_trade_network import config
+
+partners = ", ".join(config.PARTNERS)
+print(f"""
+The network is the **EU-27 plus {len(config.PARTNERS)} major trading partners**
+({partners}) = **{len(config.COUNTRIES)} economies**, for the year **{config.YEAR}**.
+Both the year and the country set live in `src/eu_trade_network/config.py` and can be
+changed without touching any notebook.
+""")
+```
+
+Products are aggregated over all HS chapters for the merchandise network, and restricted to
+**HS chapter 27** (mineral fuels, oils, gas, electricity) for the energy subnetwork in
+[RQ4](notebooks/05_energy_subnetwork.ipynb). Self-loops are dropped, and a flow is kept only
+when **both** endpoints are in the node set — a restriction whose cost is measured
+explicitly in RQ4.
+
+## How the network is modelled
+
+The graph is **directed and weighted**. An edge i→j carries `value_kusd`, the exports from
+i to j. So a node's **out-strength is its total exports** and its **in-strength its total
+imports**. The result is a *complete* digraph: every economy trades with every other, giving
+1,190 edges at density 1.0. That single property drives most of what follows.
+
+### Betweenness needs a distance, not a capacity
+
+Trade value is a **capacity** — a bigger number means two economies are more strongly
+connected, i.e. *closer*. Shortest-path algorithms want the opposite: a **cost**, where
+bigger means further apart. Passing `value_kusd` straight into betweenness would therefore
+route every path through the *weakest* links and invert the result.
+
+Weighted betweenness here uses `distance = 1 / value_kusd`, so heavily-traded corridors are
+short and thin ones are long. **Unweighted** betweenness is reported alongside it as the
+pure-topology view — and on a complete digraph it is identically **zero**, because every
+pair is already adjacent and no node ever lies on a shortest path.
+
+**Eigenvector centrality and PageRank** use `value_kusd` directly as the weight, since
+those measures want a strength, not a distance.
+
+### The backbone, not a power law
+
+Because the graph is dense, the scale-free and small-world framing that suits sparse
+networks does not apply, and no power law is fitted to the strength distribution. Where a
+sparse object is genuinely needed — for community detection and for asking whether the
+network can fragment — we extract the **statistically significant backbone** with the
+**disparity filter** (Serrano, Boguñá & Vespignani, *PNAS* 2009).
+
+The filter asks, for each economy separately, whether a given link carries a
+significantly larger share of that economy's trade than a random allocation of its total
+across its partners would produce. Links that survive at α = 0.05 are the ones that matter
+to at least one of their two endpoints. This keeps **184 of 1,190 edges** — a network that
+is still connected but now has structure to find.
+
+### Communities
+
+Louvain runs on an **undirected, weighted projection**: the i→j and j→i values are summed
+into one edge, so a bilateral relationship is a single weighted link. It is run on both the
+full graph and the backbone, and the partition with the higher **modularity Q** is kept.
+
+### Resilience
+
+Economies are removed one at a time, tracking two quantities after each removal: the
+**largest weakly-connected component** as a share of surviving economies, and the share of
+the **original trade value** still carried inside that component. Value stranded in a
+splinter component counts as lost.
+
+**Targeted** removal takes hubs first, by out-strength and then by weighted betweenness,
+with both rankings fixed on the intact network rather than recomputed as it degrades.
+**Random** failure is the mean of 20 seeded runs, shown with a ±1 sd band. The **critical
+fraction** is the first removal share at which the largest component stops holding half the
+surviving economies.
+
+### Reproducibility
+
+Every stochastic step — Louvain, the random-failure runs, network layouts — is seeded from
+`config.RANDOM_SEED`, so re-running the notebooks reproduces the published numbers exactly.
+
+## Caveats worth reading before the results
+
+**2022 is not a neutral year.** It is the energy-crisis year and the first year of
+large-scale sanctions on Russia. BACI values are current USD, so the energy subnetwork's
+share of total value reflects *prices* as much as volumes, and Russia still tops the 2022
+energy table despite sanctions that were only partly in force during it.
+
+**The node set is a frame, and for energy a tight one.** Only **48%** of these economies'
+energy imports originate inside the node set, against 65% for merchandise. Europe's crude
+and LNG largely come from the Gulf, Kazakhstan, and North and West Africa — none of which
+are nodes here. The energy graph therefore describes how energy is *redistributed* within
+Europe, not where it comes from.
+
+**Customs data misattributes pipeline gas.** A flow is recorded against the declared
+consignment partner, so gas crossing trading hubs lands on the wrong edge. In this data
+Austria looks like a net gas exporter in 2022, which it certainly was not. Treat trade data
+as evidence about *value routed*, and use physical flow data for questions about dependence.
+
+## Licence and citation
+
+BACI is distributed under the **Etalab Open Licence 2.0** — any use is permitted with
+attribution, which is why this repository points at CEPII rather than redistributing the
+files.
+
+> Gaulier, G. & Zignago, S. (2010). *BACI: International Trade Database at the
+> Product-Level*. CEPII Working Paper N°2010-23.

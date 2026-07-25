@@ -61,22 +61,22 @@ Status: ⬜ todo · 🟡 in progress · ✅ done
   framing (that framing belongs to the sibling air-transport project).
 - RQ4 keeps the same 35-economy node set as RQ1–RQ3 for comparability, and reports the
   resulting blind spot explicitly (`energy.import_sourcing`) instead of widening it.
+- Content split: **README** = shopfront (4 one-liners + live site link); **Home** =
+  findings + takeaways; **data.qmd** = source/method/caveats once; **notebooks** =
+  executed analysis pages; **data/README.md** = download steps only. Interactive
+  network is its own page (`network.qmd`), not embedded in NB03. Site published via
+  local `quarto publish gh-pages` (no CI render; BACI stays local).
 
-## Deliverables (P7)
-- `index.qmd` — full report: overview, data & method, RQ1–RQ4 sections with tables and
-  headline figures, embedded interactive network, 3 takeaways. `quarto render` → `_site/`
-  (gitignored) and copies `figures/headline/` + `network_viz/` into the site.
-- `_quarto.yml` now pins `project.render` to `index.qmd` only, so repo docs
-  (`AGENTS.md`, `PROGRESS.md`, `docs/`) are no longer picked up as website pages.
-- `README.md` — every `[FILL]` replaced with run numbers; hero = `01_flow_map.png`;
-  report link added.
-- `figures/headline/` — one clean PNG per research question (01 hero flow map,
-  02 backbone/RQ1, 03 communities/RQ2, 04 resilience/RQ3, 05 energy/RQ4).
-- All five notebooks re-executed top-to-bottom with no errors; numbers above reproduce
-  exactly. Outputs live on disk, stripped from git by the nbstripout clean filter.
-- Green: `ruff check` · `ruff format --check` · `basedpyright` (0 errors) ·
-  `pytest` (36 passed) · `quarto render`.
+## Deliverables (P7 + site polish)
+- Quarto website with docked sidebar + navbar (Home / Data & method / Interactive
+  network) and Analysis section rendering `notebooks/01–05` with folded code.
+- `index.qmd` — findings landing + 3 takeaways + links into notebooks.
+- `data.qmd` — single Data & method reference; `network.qmd` — PyVis iframe.
+- `README.md` — short bullets + live URL
+  https://fatemeh-studio.github.io/eu-trade-network/
+- `figures/headline/` — one PNG per RQ; notebooks keep outputs on disk (nbstripout).
+- Green: `ruff` · `basedpyright` · `pytest` · `quarto render`.
 
 ## Current next step
-> **Publish repo** — commit `docs: report, README findings, headline figures`, tag
-> `v0.1.0`, and optionally `quarto publish gh-pages` + add the live link to the README.
+> **Publish** — commit the site polish, tag `v0.1.0`, then
+> `quarto publish gh-pages` so the live URL serves the rendered notebooks.

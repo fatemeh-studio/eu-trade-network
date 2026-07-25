@@ -70,6 +70,9 @@ Status: ⬜ todo · 🟡 in progress · ✅ done
 ## Deliverables (P7 + site polish)
 - Quarto website with docked sidebar + navbar (Home / Data & method / Interactive
   network) and Analysis section rendering `notebooks/01–05` with folded code.
+  Content column widened (`grid.body-width: 1200px`); edge chevrons
+  (`styles/sidebar-toggles.*`) hide left nav / right TOC and expand the main
+  column into that space for wide figures.
 - `index.qmd` — findings landing + 3 takeaways + links into notebooks.
 - `data.qmd` — single Data & method reference; `network.qmd` — PyVis iframe.
 - `README.md` — short bullets + live URL

@@ -68,6 +68,14 @@ format:
     code-summary: "Show code"
     fig-width: 9
     fig-height: 6
+    # Wider centre column so maps/plots are not squeezed by the rails.
+    grid:
+      body-width: 1200px
+      sidebar-width: 260px
+      margin-width: 220px
+    # Edge chevrons hide left nav / right TOC and expand the content into that space.
+    css: styles/sidebar-toggles.css
+    include-after-body: styles/sidebar-toggles.html
 
 execute:
   # Use frozen cell outputs from `_freeze/` so `quarto render` / `quarto publish`

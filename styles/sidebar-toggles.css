@@ -1,0 +1,93 @@
+/* Left-nav + right-TOC collapse: expand the main column into freed space. */
+
+.etn-rail-toggle {
+  position: fixed;
+  top: 50%;
+  z-index: 1060;
+  transform: translateY(-50%);
+  width: 1.5rem;
+  height: 3rem;
+  padding: 0;
+  border: 1px solid rgba(255, 255, 255, 0.18);
+  background: #2b3e50;
+  color: #dee2e6;
+  cursor: pointer;
+  display: none;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.35);
+}
+
+.etn-rail-toggle:hover {
+  background: #375a7f;
+  color: #fff;
+}
+
+.etn-rail-toggle:focus-visible {
+  outline: 2px solid #00bc8c;
+  outline-offset: 2px;
+}
+
+.etn-rail-toggle-left {
+  left: 0;
+  border-left: 0;
+  border-radius: 0 0.35rem 0.35rem 0;
+}
+
+.etn-rail-toggle-right {
+  right: 0;
+  border-right: 0;
+  border-radius: 0.35rem 0 0 0.35rem;
+}
+
+@media (min-width: 992px) {
+  body.nav-sidebar .etn-rail-toggle-left,
+  body:not(.etn-no-toc) .etn-rail-toggle-right {
+    display: inline-flex;
+  }
+
+  /* Keep the left toggle clear of the docked sidebar when it is open. */
+  body.nav-sidebar:not(.etn-hide-sidebar) .etn-rail-toggle-left {
+    left: var(--etn-sidebar-width, 250px);
+  }
+
+  body.etn-hide-sidebar #quarto-sidebar,
+  body.etn-hide-sidebar #quarto-sidebar-glass {
+    display: none !important;
+  }
+
+  body.etn-hide-toc #quarto-margin-sidebar {
+    display: none !important;
+  }
+
+  /* Expand main content into the columns the rails occupied. */
+  body.etn-hide-sidebar:not(.etn-hide-toc) #quarto-document-content {
+    grid-column: page-start / body-content-end !important;
+  }
+
+  body.etn-hide-toc:not(.etn-hide-sidebar) #quarto-document-content {
+    grid-column: body-content-start / page-end !important;
+  }
+
+  body.etn-hide-sidebar.etn-hide-toc #quarto-document-content {
+    grid-column: page-start / page-end !important;
+  }
+
+  body.etn-hide-sidebar.etn-hide-toc.docked #quarto-content.page-columns {
+    grid-template-columns:
+      [screen-start] 1.5em
+      [screen-start-inset page-start page-start-inset body-start-outset body-start body-content-start]
+      minmax(0, 1fr)
+      [body-content-end body-end body-end-outset page-end-inset page-end screen-end-inset]
+      1.5em
+      [screen-end] !important;
+  }
+}
+
+/* Figures should always use the full content width. */
+#quarto-document-content .cell-output-display img,
+#quarto-document-content figure img,
+#quarto-document-content .quarto-figure img {
+  max-width: 100%;
+  height: auto;
+}

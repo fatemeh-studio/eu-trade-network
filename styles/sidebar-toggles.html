@@ -1,0 +1,133 @@
+<script>
+(() => {
+  const STORAGE_KEY = "etn-sidebar-rails";
+  const LEFT = "etn-hide-sidebar";
+  const RIGHT = "etn-hide-toc";
+
+  function canPersist() {
+    try {
+      return window.location.protocol !== "file:";
+    } catch {
+      return false;
+    }
+  }
+
+  function loadState() {
+    if (!canPersist()) {
+      return { left: false, right: false };
+    }
+    try {
+      const raw = window.localStorage.getItem(STORAGE_KEY);
+      if (!raw) {
+        return { left: false, right: false };
+      }
+      const parsed = JSON.parse(raw);
+      return {
+        left: Boolean(parsed.left),
+        right: Boolean(parsed.right),
+      };
+    } catch {
+      return { left: false, right: false };
+    }
+  }
+
+  function saveState(state) {
+    if (!canPersist()) {
+      return;
+    }
+    try {
+      window.localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+    } catch {
+      /* ignore quota / private mode */
+    }
+  }
+
+  function applyState(state) {
+    document.body.classList.toggle(LEFT, state.left);
+    document.body.classList.toggle(RIGHT, state.right);
+
+    const leftBtn = document.getElementById("etn-toggle-left");
+    const rightBtn = document.getElementById("etn-toggle-right");
+    if (leftBtn) {
+      leftBtn.setAttribute("aria-pressed", String(state.left));
+      leftBtn.title = state.left ? "Show left sidebar" : "Hide left sidebar";
+      leftBtn.setAttribute(
+        "aria-label",
+        state.left ? "Show left sidebar" : "Hide left sidebar",
+      );
+      leftBtn.innerHTML = state.left
+        ? '<i class="bi bi-chevron-right" aria-hidden="true"></i>'
+        : '<i class="bi bi-chevron-left" aria-hidden="true"></i>';
+    }
+    if (rightBtn) {
+      rightBtn.setAttribute("aria-pressed", String(state.right));
+      rightBtn.title = state.right ? "Show right sidebar" : "Hide right sidebar";
+      rightBtn.setAttribute(
+        "aria-label",
+        state.right ? "Show right sidebar" : "Hide right sidebar",
+      );
+      rightBtn.innerHTML = state.right
+        ? '<i class="bi bi-chevron-left" aria-hidden="true"></i>'
+        : '<i class="bi bi-chevron-right" aria-hidden="true"></i>';
+    }
+
+    window.dispatchEvent(new Event("resize"));
+  }
+
+  function syncSidebarWidth() {
+    const sidebar = document.getElementById("quarto-sidebar");
+    if (!sidebar) {
+      return;
+    }
+    const width = Math.round(sidebar.getBoundingClientRect().width);
+    if (width > 0) {
+      document.body.style.setProperty("--etn-sidebar-width", `${width}px`);
+    }
+  }
+
+  function ensureButtons() {
+    if (!document.getElementById("etn-toggle-left")) {
+      const left = document.createElement("button");
+      left.type = "button";
+      left.id = "etn-toggle-left";
+      left.className = "etn-rail-toggle etn-rail-toggle-left";
+      document.body.appendChild(left);
+    }
+    if (!document.getElementById("etn-toggle-right")) {
+      const right = document.createElement("button");
+      right.type = "button";
+      right.id = "etn-toggle-right";
+      right.className = "etn-rail-toggle etn-rail-toggle-right";
+      document.body.appendChild(right);
+    }
+
+    const hasToc = Boolean(document.getElementById("quarto-margin-sidebar"));
+    document.body.classList.toggle("etn-no-toc", !hasToc);
+  }
+
+  document.addEventListener("DOMContentLoaded", () => {
+    ensureButtons();
+    syncSidebarWidth();
+
+    const state = loadState();
+    applyState(state);
+
+    document.getElementById("etn-toggle-left")?.addEventListener("click", () => {
+      state.left = !state.left;
+      saveState(state);
+      applyState(state);
+      window.requestAnimationFrame(syncSidebarWidth);
+    });
+
+    document
+      .getElementById("etn-toggle-right")
+      ?.addEventListener("click", () => {
+        state.right = !state.right;
+        saveState(state);
+        applyState(state);
+      });
+
+    window.addEventListener("resize", syncSidebarWidth);
+  });
+})();
+</script>

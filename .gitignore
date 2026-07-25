@@ -11,6 +11,9 @@ data/external/
 # QA / scratch figures
 figures/qa/
 
+# Generated interactive network HTML (PyVis)
+network_viz/
+
 # Quarto
 /_site/
 /.quarto/

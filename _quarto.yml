@@ -1,6 +1,10 @@
 project:
   type: website
   output-dir: _site
+  resources:
+    # Interactive PyVis network (built by notebooks/03_communities.ipynb) copied
+    # verbatim into the rendered site.
+    - network_viz/
 
 website:
   title: "European Trade Network"
@@ -8,6 +12,9 @@ website:
     left:
       - href: index.qmd
         text: Overview
+      - href: network_viz/03_trade_communities.html
+        text: Interactive network
+        target: _blank
 
 format:
   html:

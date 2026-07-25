@@ -23,8 +23,12 @@ betweenness, higher than its raw trade volume would suggest, reflecting its brid
 between Western and Central-Eastern Europe."]
 
 **RQ2 — Do trade communities emerge, and do they follow geography?**
-[FILL: e.g. "Louvain finds K communities (modularity = 0.XX). They broadly follow
-geography but cut across EU membership — e.g. cluster X groups …"]
+Weighted Louvain on the disparity-filter backbone finds **3 communities (modularity Q = 0.25)**:
+a German-anchored continental core, a Nordic-Baltic cluster (Norway, Sweden, Denmark, Finland,
+Estonia), and an extra-European partner bloc (USA, China, Japan, Russia, UK, Turkey). The blocs
+follow **geography and trade intensity, not EU membership** — the EU-27 splits across all three,
+non-members Switzerland and Norway sit inside their neighbouring EU clusters, and EU-member
+Ireland joins the US-led bloc (its exports are dominated by US-linked pharma/tech).
 
 **RQ3 — How resilient is the network to hub failure?**
 [FILL: e.g. "Removing the top N economies by strength fragments the network after X% of

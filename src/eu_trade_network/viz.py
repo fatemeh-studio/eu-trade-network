@@ -999,9 +999,411 @@ def plot_degree_distribution(strength: pd.DataFrame) -> go.Figure:
     return fig
 
 
-def plot_network_pyvis(undirected: nx.Graph, partition: dict[str, int], out_html: Path) -> None:
-    """Interactive PyVis network: node size = strength, colour = community."""
-    raise NotImplementedError("TODO: implement in Cursor Prompt P4")
+# Okabe–Ito qualitative palette (colour-blind safe) for community fills, cycled.
+_COMMUNITY_COLORS: tuple[str, ...] = (
+    "#56B4E9",  # sky blue
+    "#E69F00",  # orange
+    "#009E73",  # bluish green
+    "#F0E442",  # yellow
+    "#CC79A7",  # reddish purple
+    "#0072B2",  # blue
+    "#D55E00",  # vermillion
+    "#999999",  # grey
+)
+
+
+def plot_community_map(
+    node_meta: pd.DataFrame,
+    partition: dict[str, int],
+    edgelist: pd.DataFrame | None = None,
+    title: str | None = None,
+) -> go.Figure:
+    """Geographic map of trade communities: nodes coloured by Louvain community.
+
+    Nodes sit at lon/lat, coloured by community and sized by export strength. When
+    ``edgelist`` is supplied (e.g. the backbone) its edges are drawn faintly so the
+    bloc structure is visible against geography. Kaleido-safe Cartesian axes.
+
+    Args:
+        node_meta: Nodes with ``iso3``, ``lat``, ``lon``; optional ``name``,
+            ``out_strength``.
+        partition: Mapping ISO3 → community id.
+        edgelist: Optional edges (``exporter_iso3``, ``importer_iso3``, ``value_kusd``)
+            drawn as faint background lines.
+        title: Optional figure title.
+
+    Returns:
+        Plotly figure ready for display or :func:`save_fig`.
+    """
+    required_node = {"iso3", "lat", "lon"}
+    missing_node = required_node - set(node_meta.columns)
+    if missing_node:
+        raise ValueError(f"node_meta missing columns: {sorted(missing_node)}")
+
+    meta = node_meta.copy().reset_index(drop=True)
+    meta["iso3"] = meta["iso3"].astype(str)
+    meta["community"] = [int(partition.get(str(i), -1)) for i in meta["iso3"]]
+    coords = {
+        str(iso3): (float(lat), float(lon))
+        for iso3, lat, lon in meta[["iso3", "lat", "lon"]].itertuples(index=False, name=None)
+    }
+
+    if "out_strength" in meta.columns:
+        s_vals = meta["out_strength"].astype(float).to_numpy()
+    else:
+        s_vals = pd.Series([1.0] * len(meta)).to_numpy()
+    s_max = float(s_vals.max()) if len(s_vals) else 1.0
+    sizes = (9.0 + 20.0 * (s_vals / s_max) ** 0.5).tolist()
+
+    fig = go.Figure()
+
+    if edgelist is not None and len(edgelist):
+        max_val = float(edgelist["value_kusd"].to_numpy().max())
+        for exporter, importer, value in edgelist[
+            ["exporter_iso3", "importer_iso3", "value_kusd"]
+        ].itertuples(index=False, name=None):
+            exp, imp = str(exporter), str(importer)
+            if exp not in coords or imp not in coords:
+                continue
+            lat0, lon0 = coords[exp]
+            lat1, lon1 = coords[imp]
+            share = float(value) / max_val
+            fig.add_trace(
+                go.Scatter(
+                    x=[lon0, lon1, None],
+                    y=[lat0, lat1, None],
+                    mode="lines",
+                    line={"width": 0.3 + 1.4 * (share**0.7), "color": _EDGE.format(alpha=0.22)},
+                    hoverinfo="skip",
+                    showlegend=False,
+                )
+            )
+
+    names = (
+        meta["name"].astype(str).tolist()
+        if "name" in meta.columns
+        else meta["iso3"].astype(str).tolist()
+    )
+    hover = [f"{n} ({i})" for n, i in zip(names, meta["iso3"].astype(str), strict=True)]
+
+    for comm_id in sorted({int(c) for c in meta["community"] if int(c) >= 0}):
+        frame = meta.loc[meta["community"] == comm_id]
+        if frame.empty:
+            continue
+        sub_idx = frame.index.to_numpy()
+        color = _COMMUNITY_COLORS[comm_id % len(_COMMUNITY_COLORS)]
+        fig.add_trace(
+            go.Scatter(
+                x=frame["lon"].astype(float).tolist(),
+                y=frame["lat"].astype(float).tolist(),
+                mode="markers",
+                name=f"Community {comm_id}",
+                marker={
+                    "size": [sizes[int(i)] for i in sub_idx],
+                    "color": color,
+                    "line": {"width": 0.7, "color": _MARKER_LINE},
+                    "opacity": 0.95,
+                },
+                customdata=[hover[int(i)] for i in sub_idx],
+                hovertemplate="%{customdata}<extra></extra>",
+            )
+        )
+
+    lon_min = float(meta["lon"].to_numpy(dtype=float).min())
+    lon_max = float(meta["lon"].to_numpy(dtype=float).max())
+    lat_min = float(meta["lat"].to_numpy(dtype=float).min())
+    lat_max = float(meta["lat"].to_numpy(dtype=float).max())
+    x_range = (lon_min - 10.0, lon_max + 10.0)
+    y_range = (lat_min - 4.0, lat_max + 6.0)
+
+    fig_w, fig_h = 1120, 560
+    margin = {"l": 70, "r": 30, "t": 70, "b": 90}
+
+    labels = [
+        {"x": float(lon), "y": float(lat), "text": iso}
+        for iso, lat, lon in meta[["iso3", "lat", "lon"]].itertuples(index=False, name=None)
+    ]
+    obstacles = tuple(
+        (float(lon), float(lat))
+        for lon, lat in meta[["lon", "lat"]].itertuples(index=False, name=None)
+    )
+    annotations = _place_labels(
+        labels,
+        x_range=x_range,
+        y_range=y_range,
+        fig_w=fig_w,
+        fig_h=fig_h,
+        margin=margin,
+        obstacles=obstacles,
+    )
+    annotations.append(
+        _footnote(
+            "Node colour = Louvain community · size ∝ export strength · "
+            "faint lines = backbone edges",
+            y=-0.18,
+        )
+    )
+
+    fig.update_layout(
+        **_dark_layout(
+            title={
+                "text": title or "Trade communities (Louvain)",
+                "x": 0.02,
+                "xanchor": "left",
+                "font": {"size": _FS_TITLE, "color": _INK},
+            },
+            xaxis=_axis_dark(title={"text": "Longitude"}, range=list(x_range)),
+            yaxis=_axis_dark(title={"text": "Latitude"}, range=list(y_range)),
+            margin=margin,
+            height=fig_h,
+            width=fig_w,
+            showlegend=True,
+            annotations=annotations,
+        )
+    )
+    return fig
+
+
+# Injected once into the generated HTML: overlay panel / legend / control styling.
+_PYVIS_UI_CSS = """
+<style>
+#eutn-panel, #eutn-legend, #eutn-controls {
+  position: fixed; z-index: 1000;
+  background: rgba(18,20,26,0.88); color: #e8eaed;
+  border: 1px solid rgba(255,255,255,0.14); border-radius: 8px;
+  font-family: "IBM Plex Sans", Arial, sans-serif; font-size: 13px; line-height: 1.45;
+  box-shadow: 0 4px 18px rgba(0,0,0,0.45);
+}
+#eutn-panel { top: 14px; left: 14px; max-width: 340px; padding: 12px 14px; }
+#eutn-panel h1 { font-size: 16px; margin: 0 0 4px; color: #ffffff; }
+#eutn-panel .sub { color: #b4b9c2; font-size: 12px; margin-bottom: 8px; }
+#eutn-panel .desc { color: #d7dae0; }
+#eutn-panel .tips { color: #b4b9c2; font-size: 12px; margin-top: 8px;
+  border-top: 1px solid rgba(255,255,255,0.1); padding-top: 6px; }
+#eutn-legend { bottom: 16px; left: 14px; padding: 10px 12px; max-width: 320px; }
+#eutn-legend .row { display: flex; align-items: center; margin: 3px 0; }
+#eutn-legend .swatch { width: 13px; height: 13px; border-radius: 50%; margin-right: 8px;
+  border: 1px solid rgba(255,255,255,0.25); flex: 0 0 auto; }
+#eutn-legend .bar { width: 26px; border-top: 3px solid rgba(86,180,233,0.75);
+  margin-right: 8px; flex: 0 0 auto; }
+#eutn-legend .sizedot { width: 14px; height: 14px; border-radius: 50%;
+  background: #b4b9c2; margin-right: 8px; flex: 0 0 auto; }
+#eutn-legend hr { border: none; border-top: 1px solid rgba(255,255,255,0.12); margin: 8px 0; }
+#eutn-legend .cap { color: #b4b9c2; font-size: 11px; text-transform: uppercase;
+  letter-spacing: .04em; margin-bottom: 4px; }
+#eutn-controls { top: 14px; right: 14px; padding: 8px; display: flex;
+  flex-direction: column; gap: 6px; }
+#eutn-controls button { background: #1a1d26; color: #e8eaed;
+  border: 1px solid rgba(255,255,255,0.18); border-radius: 6px; padding: 6px 10px;
+  font-size: 12px; cursor: pointer; font-family: inherit; text-align: left; }
+#eutn-controls button:hover { background: #2a2f3a; border-color: #56B4E9; }
+</style>
+"""
+
+# Injected before `new vis.Network(...)`: restore HTML rendering in node tooltips
+# (modern vis-network shows the `title` string as plain text for XSS safety, so the
+# `<br>` tags in our tooltips would otherwise render literally).
+_PYVIS_TOOLTIP_FIX = """
+function htmlTitle(html) {
+  var container = document.createElement("div");
+  container.style.whiteSpace = "normal";
+  container.style.maxWidth = "260px";
+  container.innerHTML = html;
+  return container;
+}
+nodes.forEach(function (n) {
+  if (typeof n.title === "string") {
+    nodes.update({ id: n.id, title: htmlTitle(n.title) });
+  }
+});
+"""
+
+# Injected before `</body>`: wire up the control buttons once the network exists.
+_PYVIS_UI_SCRIPT = """
+<script type="text/javascript">
+(function () {
+  function ready() {
+    if (typeof network === "undefined" || !network) { setTimeout(ready, 120); return; }
+    network.setOptions({ interaction: { hover: true, tooltipDelay: 120, keyboard: true,
+      multiselect: true } });
+    var physicsOn = true;
+    var freezeBtn = document.getElementById("eutn-freeze");
+    freezeBtn.onclick = function () {
+      physicsOn = !physicsOn;
+      network.setOptions({ physics: { enabled: physicsOn } });
+      freezeBtn.textContent = physicsOn ? "Freeze layout" : "Resume layout";
+    };
+    document.getElementById("eutn-fit").onclick = function () {
+      network.fit({ animation: true });
+    };
+    var labelsOn = true, saved = {};
+    if (typeof nodes !== "undefined") { nodes.forEach(function (n) { saved[n.id] = n.label; }); }
+    var labelsBtn = document.getElementById("eutn-labels");
+    labelsBtn.onclick = function () {
+      labelsOn = !labelsOn;
+      var upd = [];
+      nodes.forEach(function (n) { upd.push({ id: n.id, label: labelsOn ? saved[n.id] : "" }); });
+      nodes.update(upd);
+      labelsBtn.textContent = labelsOn ? "Hide labels" : "Show labels";
+    };
+  }
+  if (document.readyState === "complete") { ready(); }
+  else { window.addEventListener("load", ready); }
+})();
+</script>
+"""
+
+
+def _pyvis_overlay_html(
+    partition: dict[str, int],
+    title: str,
+    subtitle: str,
+    description: str,
+    community_labels: dict[int, str] | None,
+) -> str:
+    """Build the fixed-position overlay (header, controls, legend) for the PyVis page."""
+    counts: dict[int, int] = {}
+    for comm in partition.values():
+        counts[int(comm)] = counts.get(int(comm), 0) + 1
+
+    rows: list[str] = []
+    for cid in sorted(counts):
+        color = _COMMUNITY_COLORS[cid % len(_COMMUNITY_COLORS)]
+        if community_labels and cid in community_labels:
+            label = community_labels[cid]
+        else:
+            label = f"Community {cid} · {counts[cid]} economies"
+        rows.append(
+            f'<div class="row"><span class="swatch" style="background:{color}"></span>{label}</div>'
+        )
+    legend_rows = "\n      ".join(rows)
+
+    return f"""
+<div id="eutn-panel">
+  <h1>{title}</h1>
+  <div class="sub">{subtitle}</div>
+  <div class="desc">{description}</div>
+  <div class="tips">Hover a node for country details &middot; drag nodes to rearrange &middot;
+    scroll to zoom &middot; use the buttons (top-right) to freeze the layout or refit.</div>
+</div>
+<div id="eutn-controls">
+  <button id="eutn-freeze">Freeze layout</button>
+  <button id="eutn-fit">Fit to screen</button>
+  <button id="eutn-labels">Hide labels</button>
+</div>
+<div id="eutn-legend">
+  <div class="cap">Trade communities</div>
+  {legend_rows}
+  <hr>
+  <div class="cap">Encoding</div>
+  <div class="row"><span class="sizedot"></span>Node size &prop; total trade strength</div>
+  <div class="row"><span class="bar"></span>Edge width &prop; bilateral trade value</div>
+</div>
+"""
+
+
+def plot_network_pyvis(
+    undirected: nx.Graph,
+    partition: dict[str, int],
+    out_html: Path,
+    *,
+    title: str = "European trade communities",
+    subtitle: str = "Weighted Louvain community detection",
+    description: str = (
+        "An interactive view of the European merchandise-trade network (CEPII BACI). "
+        "Each node is an economy; colour marks its detected trade community, size scales "
+        "with total trade strength, and edges are bilateral trade flows."
+    ),
+    community_labels: dict[int, str] | None = None,
+    label_size: int = 60,
+) -> None:
+    """Write an interactive PyVis network: node size ∝ strength, colour = community.
+
+    Node size scales with weighted degree (total trade strength); node colour encodes
+    the Louvain community. Edge thickness scales with the summed bilateral trade value.
+    The generated HTML is post-processed to (a) restore HTML rendering in the hover
+    tooltips, and (b) add a fixed overlay with a title/description, a colour legend, and
+    control buttons (freeze layout, fit to screen, toggle labels). Resources are inlined,
+    so the file is fully self-contained.
+
+    Args:
+        undirected: Undirected weighted graph (edge ``weight`` = summed trade value);
+            nodes may carry ``name`` / ``grp`` attributes for hover text.
+        partition: Mapping ISO3 → community id (see :func:`communities.detect_communities`).
+        out_html: Destination ``.html`` path (parent dirs are created).
+        title: Heading shown in the overlay panel.
+        subtitle: Secondary line under the heading (e.g. ``K`` and modularity).
+        description: Short paragraph explaining what the visualisation shows.
+        community_labels: Optional mapping community id → legend label. Defaults to a
+            generic ``"Community {id} · {n} economies"`` label.
+        label_size: Node label font size in px (independent of zoom). Larger values keep
+            the ISO3 labels readable without zooming in.
+    """
+    from pyvis.network import Network
+
+    strengths = {n: float(d) for n, d in undirected.degree(weight="weight")}
+    s_max = max(strengths.values()) if strengths else 1.0
+    weights = [float(d.get("weight", 0.0)) for _, _, d in undirected.edges(data=True)]
+    w_max = max(weights) if weights else 1.0
+
+    net = Network(
+        height="100vh",
+        width="100%",
+        bgcolor=_PAPER,
+        font_color=_INK,  # type: ignore[arg-type]  # pyvis stub mistypes this as bool
+        directed=False,
+        cdn_resources="in_line",
+        notebook=False,
+    )
+    net.barnes_hut(gravity=-12000, central_gravity=0.4, spring_length=120)
+
+    for node in undirected.nodes:
+        iso3 = str(node)
+        attrs = undirected.nodes[node]
+        comm = int(partition.get(iso3, -1))
+        color = _COMMUNITY_COLORS[comm % len(_COMMUNITY_COLORS)] if comm >= 0 else _MUTED
+        size = 10.0 + 40.0 * (strengths.get(node, 0.0) / s_max) ** 0.5
+        name = str(attrs.get("name", iso3))
+        grp = str(attrs.get("grp", ""))
+        title_html = (
+            f"<b>{name}</b> ({iso3})<br>Community {comm}"
+            f"{f' &middot; {grp}' if grp else ''}"
+            f"<br>Trade strength: {strengths.get(node, 0.0):,.0f} kUSD"
+        )
+        net.add_node(
+            iso3,
+            label=iso3,
+            title=title_html,
+            size=size,
+            color=color,
+            borderWidth=1,
+        )
+
+    for u, v, data in undirected.edges(data=True):
+        w = float(data.get("weight", 0.0))
+        net.add_edge(str(u), str(v), value=w, width=0.4 + 4.0 * (w / w_max) ** 0.6)
+
+    out_html = Path(out_html)
+    out_html.parent.mkdir(parents=True, exist_ok=True)
+    net.write_html(str(out_html), notebook=False, open_browser=False)
+
+    html = out_html.read_text(encoding="utf-8")
+    # pyvis fixes each node's font to just the colour, ignoring any font size passed to
+    # add_node. Enlarge the ISO3 labels (with a dark outline for contrast) by rewriting
+    # that font object directly so labels are readable without zooming in.
+    node_font_src = f'"font": {{"color": "{_INK}"}}'
+    node_font_dst = (
+        f'"font": {{"color": "{_INK}", "size": {label_size}, '
+        f'"face": "IBM Plex Sans, Arial, sans-serif", '
+        f'"strokeWidth": 4, "strokeColor": "{_PAPER}"}}'
+    )
+    html = html.replace(node_font_src, node_font_dst)
+    net_anchor = "network = new vis.Network(container, data, options);"
+    if net_anchor in html:
+        html = html.replace(net_anchor, _PYVIS_TOOLTIP_FIX + "\n                  " + net_anchor, 1)
+    overlay = _pyvis_overlay_html(partition, title, subtitle, description, community_labels)
+    html = html.replace("</body>", _PYVIS_UI_CSS + overlay + _PYVIS_UI_SCRIPT + "\n    </body>", 1)
+    out_html.write_text(html, encoding="utf-8")
 
 
 def plot_resilience(curves: pd.DataFrame) -> go.Figure:

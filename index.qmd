@@ -28,6 +28,22 @@ is the network to losing its hubs.
 
 `{FILL: backbone + Louvain map + modularity}`
 
+### Explore the network interactively
+
+The graph below is a live, weighted **Louvain** community view of the trade network
+(built by `notebooks/03_communities.ipynb`). Node colour marks the detected trade
+community, node size scales with total trade strength, and edges are bilateral trade
+flows. **Hover** a node for country details, **drag** nodes to rearrange, **scroll** to
+zoom, and use the on-canvas buttons to freeze the layout, refit, or toggle labels.
+
+```{=html}
+<iframe src="network_viz/03_trade_communities.html" title="Interactive European trade communities"
+        style="width:100%; height:640px; border:1px solid rgba(255,255,255,0.15); border-radius:8px;"
+        loading="lazy"></iframe>
+```
+
+[Open the interactive network in a new tab →](network_viz/03_trade_communities.html){target="_blank"}
+
 ## RQ3 — Resilience
 
 `{FILL: targeted vs random curves + critical threshold}`

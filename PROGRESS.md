@@ -8,7 +8,7 @@ Status: ⬜ todo · 🟡 in progress · ✅ done
 - ✅ **P1** `config.py` + `data_loader.py` (load BACI, map ISO3, filter, aggregate)
 - ✅ **P2** `graph.py` + `db.py` + `schema.sql` → **NB01** graph + hero flow map
 - ✅ **P3** `metrics.py` (centrality, backbone, rich-club) → **NB02** rankings (Austria)
-- ⬜ **P4** `communities.py` → **NB03** Louvain blocs + geo map + PyVis
+- ✅ **P4** `communities.py` → **NB03** Louvain blocs + geo map + PyVis
 - ⬜ **P5** `resilience.py` → **NB04** targeted vs random + critical threshold
 - ⬜ **P6** *(optional)* **NB05** energy (HS-27) subnetwork — bridge to energy project
 - ⬜ **P7** `index.qmd` report + README findings + headline figures + `v0.1.0` tag
@@ -20,7 +20,14 @@ Status: ⬜ todo · 🟡 in progress · ✅ done
   partners already trade directly). Mid-tier by volume: 17th of 35 by export
   strength, 13th by PageRank; top partner Germany both ways. Disparity filter
   keeps 184/1190 edges at α = 0.05 (`figures/headline/02_backbone_map.png`).
-- RQ2 communities (K, modularity): …
+- RQ2 communities (K, modularity): Weighted Louvain finds **K = 3** blocs. The
+  disparity-filter backbone gives the clearer partition (**Q = 0.25** vs 0.15 on the
+  full dense graph). Blocs are **geographic, not political**: (1) a German-anchored
+  continental core (23 economies, 22 EU-27 + CHE), (2) a Nordic-Baltic cluster
+  (NOR, SWE, DNK, FIN, EST), (3) an extra-European partner bloc (USA, CHN, JPN, RUS,
+  GBR, TUR + IRL). The EU-27 splits across all three; non-members CHE/NOR sit inside
+  EU clusters while EU-member Ireland defects to the US-led bloc
+  (`figures/headline/03_community_map.png`, `network_viz/03_trade_communities.html`).
 - RQ3 resilience (critical fraction): …
 - RQ4 energy subnetwork: …
 
@@ -31,4 +38,4 @@ Status: ⬜ todo · 🟡 in progress · ✅ done
   framing (that framing belongs to the sibling air-transport project).
 
 ## Current next step
-> Run **P4** from `docs/CURSOR_PROMPTS.md`.
+> Run **P5** from `docs/CURSOR_PROMPTS.md`.

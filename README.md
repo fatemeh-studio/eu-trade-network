@@ -34,10 +34,12 @@ nbstripout --install --attributes .gitattributes   # once per clone
 # one-time BACI download → data/raw/  (see data/README.md)
 jupyter lab   # run notebooks/01 → 05 top-to-bottom
 
-# rebuild the site (optional; the live site is already published)
-quarto render
-# quarto publish gh-pages   # push _site to GitHub Pages
+# rebuild / publish the site — always from branch `main`, never from `gh-pages`
+quarto render --execute          # run notebooks (needs BACI); writes `_freeze/`
+# later publishes can reuse the freeze (no re-run):
+#   quarto render && PRE_COMMIT_ALLOW_NO_CONFIG=1 quarto publish gh-pages
 ```
+
 
 ## Project structure
 

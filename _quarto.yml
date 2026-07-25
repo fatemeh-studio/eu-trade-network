@@ -70,5 +70,8 @@ format:
     fig-height: 6
 
 execute:
-  freeze: auto
+  # Use frozen cell outputs from `_freeze/` so `quarto render` / `quarto publish`
+  # keep notebook figures & tables even though .ipynb files are stripped by nbstripout.
+  # Refresh after notebook changes: `quarto render --execute` (needs BACI in data/raw/).
+  freeze: true
   warning: false

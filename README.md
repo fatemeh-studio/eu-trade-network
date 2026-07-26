@@ -31,6 +31,9 @@ pip install -e .
 pre-commit install
 nbstripout --install --attributes .gitattributes   # once per clone
 
+# register a Jupyter kernel for this env (optional)
+python -m ipykernel install --user --name eu-trade-network
+
 # one-time BACI download → data/raw/  (see data/README.md)
 jupyter lab   # run notebooks/01 → 05 top-to-bottom
 

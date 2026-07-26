@@ -8,6 +8,9 @@ data/external/
 # Secrets
 .env
 
+# Local working notes (not published)
+plan/
+
 # QA / scratch figures
 figures/qa/
 

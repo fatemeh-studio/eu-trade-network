@@ -2,8 +2,7 @@ project:
   type: website
   output-dir: _site
   render:
-    # Site pages only. AGENTS.md / PROGRESS.md / docs/ / data/README.md are repo
-    # docs and must not be picked up as website pages.
+    # Site pages only — do not pick up data/README.md or other repo docs.
     # Notebooks before network.qmd so NB03 can write network_viz/ first.
     - index.qmd
     - data.qmd

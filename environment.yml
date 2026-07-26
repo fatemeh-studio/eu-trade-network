@@ -10,6 +10,7 @@ dependencies:
   - python-louvain
   - duckdb
   - plotly
+  - python-kaleido<1
   - matplotlib
   - python-kaleido        # static PNG export for plotly
   - jupyterlab

@@ -61,7 +61,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </style>
 
 
-<script src="https://cdn.jsdelivr.net/npm/jquery@3.5.1/dist/jquery.min.js" integrity="sha384-ZvpUoO/+PpLXR1lu4jmpXWu80pZlYUAfxl5NsBMWOEPSjUn/6Z/hRTt8+pR6L4N2" crossorigin="anonymous"></script><script src="../site_libs/quarto-nav/quarto-nav.js"></script>
+<script src="../site_libs/quarto-nav/quarto-nav.js"></script>
 <script src="../site_libs/quarto-nav/headroom.min.js"></script>
 <script src="../site_libs/clipboard/clipboard.min.js"></script>
 <script src="../site_libs/quarto-search/autocomplete.umd.js"></script>
@@ -80,7 +80,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <link href="../site_libs/quarto-html/quarto-syntax-highlighting-dark-0a6b7249c26820e032cb0bd839ff02b1.css" rel="stylesheet" id="quarto-text-highlighting-styles">
 <script src="../site_libs/bootstrap/bootstrap.min.js"></script>
 <link href="../site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
-<link href="../site_libs/bootstrap/bootstrap-281c7842b2732f0e20cf55e8935bc5e6.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="dark">
+<link href="../site_libs/bootstrap/bootstrap-43b0b9101082ebe6ae2a87ce18083149.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="dark">
 <script id="quarto-search-options" type="application/json">{
   "location": "navbar",
   "copy-button": false,
@@ -108,9 +108,6 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
     "search-label": "Search"
   }
 }</script>
-<script src="https://cdn.jsdelivr.net/npm/requirejs@2.3.6/require.min.js" integrity="sha384-c9c+LnTbwQ3aujuU7ULEPVvgLs+Fn6fJUvIGTsuu1ZcCf11fiEubah0ttpca4ntM sha384-6V1/AdqZRWk1KAlWbKBlGhN7VG4iE/yAZcO6NZPMF8od0vukrvr0tg4qY6NSrItx" crossorigin="anonymous"></script>
-
-<script type="application/javascript">define('jquery', [],function() {return window.jQuery;})</script>
 
 
 <link rel="stylesheet" href="../styles/sidebar-toggles.css">
@@ -286,7 +283,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 
 <p><strong>RQ2 — do trade communities emerge, and do they follow geography?</strong> Runs weighted Louvain on the undirected projection of both the full graph and the backbone, keeps whichever partition is clearer, and maps the result.</p>
 <p>The projection and the modularity criterion are described on the <a href="../data.html">Data &amp; method</a> page. The partition found here is also browsable as an <a href="../network.html">interactive network</a>.</p>
-<div id="1" class="cell" data-quarto-private-1="{&quot;key&quot;:&quot;execution&quot;,&quot;value&quot;:{&quot;iopub.execute_input&quot;:&quot;2026-07-26T15:19:03.565896Z&quot;,&quot;iopub.status.busy&quot;:&quot;2026-07-26T15:19:03.565823Z&quot;,&quot;iopub.status.idle&quot;:&quot;2026-07-26T15:19:04.004037Z&quot;,&quot;shell.execute_reply&quot;:&quot;2026-07-26T15:19:04.003415Z&quot;}}" data-execution_count="1">
+<div id="1" class="cell">
 <details class="code-fold">
 <summary>Show code</summary>
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb1"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> __future__ <span class="im">import</span> annotations</span>
@@ -300,7 +297,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <section id="graph-undirected-projections" class="level2">
 <h2 class="anchored" data-anchor-id="graph-undirected-projections">Graph + undirected projections</h2>
 <p>Rebuild the edge list / digraph for <code>config.YEAR</code>, compute centralities (for node strengths), and build the undirected-weighted projection plus its backbone counterpart.</p>
-<div id="3" class="cell" data-quarto-private-1="{&quot;key&quot;:&quot;execution&quot;,&quot;value&quot;:{&quot;iopub.execute_input&quot;:&quot;2026-07-26T15:19:04.005220Z&quot;,&quot;iopub.status.busy&quot;:&quot;2026-07-26T15:19:04.005068Z&quot;,&quot;iopub.status.idle&quot;:&quot;2026-07-26T15:19:08.660669Z&quot;,&quot;shell.execute_reply&quot;:&quot;2026-07-26T15:19:08.660059Z&quot;}}" data-execution_count="2">
+<div id="3" class="cell">
 <details class="code-fold">
 <summary>Show code</summary>
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb2"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a>edgelist <span class="op">=</span> data_loader.build_edgelist()</span>
@@ -322,249 +319,180 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <span id="cb2-17"><a href="#cb2-17" aria-hidden="true" tabindex="-1"></a>    <span class="ss">f"backbone projection: </span><span class="sc">{</span>und_bb<span class="sc">.</span>number_of_nodes()<span class="sc">}</span><span class="ss"> nodes, </span><span class="sc">{</span>und_bb<span class="sc">.</span>number_of_edges()<span class="sc">}</span><span class="ss"> edges"</span></span>
 <span id="cb2-18"><a href="#cb2-18" aria-hidden="true" tabindex="-1"></a>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </details>
-<div class="cell-output cell-output-stdout">
-<pre><code>Full projection: 35 nodes, 595 edges; backbone projection: 35 nodes, 122 edges</code></pre>
-</div>
 </div>
 </section>
 <section id="detect-communities-full-graph-vs-backbone" class="level2">
 <h2 class="anchored" data-anchor-id="detect-communities-full-graph-vs-backbone">Detect communities — full graph vs backbone</h2>
 <p>Run weighted Louvain on both projections and keep the clearer result (higher modularity).</p>
-<div id="5" class="cell" data-quarto-private-1="{&quot;key&quot;:&quot;execution&quot;,&quot;value&quot;:{&quot;iopub.execute_input&quot;:&quot;2026-07-26T15:19:08.661895Z&quot;,&quot;iopub.status.busy&quot;:&quot;2026-07-26T15:19:08.661755Z&quot;,&quot;iopub.status.idle&quot;:&quot;2026-07-26T15:19:08.668587Z&quot;,&quot;shell.execute_reply&quot;:&quot;2026-07-26T15:19:08.668028Z&quot;}}" data-execution_count="3">
+<div id="5" class="cell">
 <details class="code-fold">
 <summary>Show code</summary>
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb4"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a>part_full <span class="op">=</span> communities.detect_communities(und_full)</span>
-<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a>mod_full <span class="op">=</span> communities.modularity(und_full, part_full)</span>
-<span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb4-4"><a href="#cb4-4" aria-hidden="true" tabindex="-1"></a>part_bb <span class="op">=</span> communities.detect_communities(und_bb)</span>
-<span id="cb4-5"><a href="#cb4-5" aria-hidden="true" tabindex="-1"></a>mod_bb <span class="op">=</span> communities.modularity(und_bb, part_bb)</span>
-<span id="cb4-6"><a href="#cb4-6" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb4-7"><a href="#cb4-7" aria-hidden="true" tabindex="-1"></a><span class="co"># Keep the clearer partition: higher modularity = better-separated blocs.</span></span>
-<span id="cb4-8"><a href="#cb4-8" aria-hidden="true" tabindex="-1"></a><span class="cf">if</span> mod_bb <span class="op">&gt;=</span> mod_full:</span>
-<span id="cb4-9"><a href="#cb4-9" aria-hidden="true" tabindex="-1"></a>    chosen_name, undirected, partition, chosen_mod <span class="op">=</span> <span class="st">"backbone"</span>, und_bb, part_bb, mod_bb</span>
-<span id="cb4-10"><a href="#cb4-10" aria-hidden="true" tabindex="-1"></a><span class="cf">else</span>:</span>
-<span id="cb4-11"><a href="#cb4-11" aria-hidden="true" tabindex="-1"></a>    chosen_name, undirected, partition, chosen_mod <span class="op">=</span> <span class="st">"full graph"</span>, und_full, part_full, mod_full</span>
-<span id="cb4-12"><a href="#cb4-12" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb4-13"><a href="#cb4-13" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f"Full graph: </span><span class="sc">{</span><span class="bu">len</span>(<span class="bu">set</span>(part_full.values()))<span class="sc">}</span><span class="ss"> communities, Q = </span><span class="sc">{</span>mod_full<span class="sc">:.4f}</span><span class="ss">"</span>)</span>
-<span id="cb4-14"><a href="#cb4-14" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f"Backbone:   </span><span class="sc">{</span><span class="bu">len</span>(<span class="bu">set</span>(part_bb.values()))<span class="sc">}</span><span class="ss"> communities, Q = </span><span class="sc">{</span>mod_bb<span class="sc">:.4f}</span><span class="ss">"</span>)</span>
-<span id="cb4-15"><a href="#cb4-15" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(</span>
-<span id="cb4-16"><a href="#cb4-16" aria-hidden="true" tabindex="-1"></a>    <span class="ss">f"→ Keeping the </span><span class="sc">{</span>chosen_name<span class="sc">}</span><span class="ss"> partition "</span></span>
-<span id="cb4-17"><a href="#cb4-17" aria-hidden="true" tabindex="-1"></a>    <span class="ss">f"(</span><span class="sc">{</span><span class="bu">len</span>(<span class="bu">set</span>(partition.values()))<span class="sc">}</span><span class="ss"> communities, Q = </span><span class="sc">{</span>chosen_mod<span class="sc">:.4f}</span><span class="ss">)."</span></span>
-<span id="cb4-18"><a href="#cb4-18" aria-hidden="true" tabindex="-1"></a>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb3"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a>part_full <span class="op">=</span> communities.detect_communities(und_full)</span>
+<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a>mod_full <span class="op">=</span> communities.modularity(und_full, part_full)</span>
+<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a>part_bb <span class="op">=</span> communities.detect_communities(und_bb)</span>
+<span id="cb3-5"><a href="#cb3-5" aria-hidden="true" tabindex="-1"></a>mod_bb <span class="op">=</span> communities.modularity(und_bb, part_bb)</span>
+<span id="cb3-6"><a href="#cb3-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-7"><a href="#cb3-7" aria-hidden="true" tabindex="-1"></a><span class="co"># Keep the clearer partition: higher modularity = better-separated blocs.</span></span>
+<span id="cb3-8"><a href="#cb3-8" aria-hidden="true" tabindex="-1"></a><span class="cf">if</span> mod_bb <span class="op">&gt;=</span> mod_full:</span>
+<span id="cb3-9"><a href="#cb3-9" aria-hidden="true" tabindex="-1"></a>    chosen_name, undirected, partition, chosen_mod <span class="op">=</span> <span class="st">"backbone"</span>, und_bb, part_bb, mod_bb</span>
+<span id="cb3-10"><a href="#cb3-10" aria-hidden="true" tabindex="-1"></a><span class="cf">else</span>:</span>
+<span id="cb3-11"><a href="#cb3-11" aria-hidden="true" tabindex="-1"></a>    chosen_name, undirected, partition, chosen_mod <span class="op">=</span> <span class="st">"full graph"</span>, und_full, part_full, mod_full</span>
+<span id="cb3-12"><a href="#cb3-12" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-13"><a href="#cb3-13" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f"Full graph: </span><span class="sc">{</span><span class="bu">len</span>(<span class="bu">set</span>(part_full.values()))<span class="sc">}</span><span class="ss"> communities, Q = </span><span class="sc">{</span>mod_full<span class="sc">:.4f}</span><span class="ss">"</span>)</span>
+<span id="cb3-14"><a href="#cb3-14" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f"Backbone:   </span><span class="sc">{</span><span class="bu">len</span>(<span class="bu">set</span>(part_bb.values()))<span class="sc">}</span><span class="ss"> communities, Q = </span><span class="sc">{</span>mod_bb<span class="sc">:.4f}</span><span class="ss">"</span>)</span>
+<span id="cb3-15"><a href="#cb3-15" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(</span>
+<span id="cb3-16"><a href="#cb3-16" aria-hidden="true" tabindex="-1"></a>    <span class="ss">f"→ Keeping the </span><span class="sc">{</span>chosen_name<span class="sc">}</span><span class="ss"> partition "</span></span>
+<span id="cb3-17"><a href="#cb3-17" aria-hidden="true" tabindex="-1"></a>    <span class="ss">f"(</span><span class="sc">{</span><span class="bu">len</span>(<span class="bu">set</span>(partition.values()))<span class="sc">}</span><span class="ss"> communities, Q = </span><span class="sc">{</span>chosen_mod<span class="sc">:.4f}</span><span class="ss">)."</span></span>
+<span id="cb3-18"><a href="#cb3-18" aria-hidden="true" tabindex="-1"></a>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </details>
-<div class="cell-output cell-output-stdout">
-<pre><code>Full graph: 3 communities, Q = 0.1509
-Backbone:   3 communities, Q = 0.2515
-→ Keeping the backbone partition (3 communities, Q = 0.2515).</code></pre>
-</div>
 </div>
 </section>
 <section id="persist-community-ids-in-duckdb" class="level2">
 <h2 class="anchored" data-anchor-id="persist-community-ids-in-duckdb">Persist community ids in DuckDB</h2>
 <p>Write the chosen community assignment (plus refreshed centralities) into the <code>nodes</code> table.</p>
-<div id="7" class="cell" data-quarto-private-1="{&quot;key&quot;:&quot;execution&quot;,&quot;value&quot;:{&quot;iopub.execute_input&quot;:&quot;2026-07-26T15:19:08.669543Z&quot;,&quot;iopub.status.busy&quot;:&quot;2026-07-26T15:19:08.669467Z&quot;,&quot;iopub.status.idle&quot;:&quot;2026-07-26T15:19:08.780307Z&quot;,&quot;shell.execute_reply&quot;:&quot;2026-07-26T15:19:08.779477Z&quot;}}" data-execution_count="4">
+<div id="7" class="cell">
 <details class="code-fold">
 <summary>Show code</summary>
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb6"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a>nodes_db[<span class="st">"community"</span>] <span class="op">=</span> [<span class="bu">int</span>(partition[i]) <span class="cf">for</span> i <span class="kw">in</span> nodes_db[<span class="st">"iso3"</span>]]</span>
-<span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb6-3"><a href="#cb6-3" aria-hidden="true" tabindex="-1"></a>con <span class="op">=</span> db.<span class="ex">connect</span>()</span>
-<span id="cb6-4"><a href="#cb6-4" aria-hidden="true" tabindex="-1"></a>db.init_schema(con)</span>
-<span id="cb6-5"><a href="#cb6-5" aria-hidden="true" tabindex="-1"></a>db.write_table(</span>
-<span id="cb6-6"><a href="#cb6-6" aria-hidden="true" tabindex="-1"></a>    con,</span>
-<span id="cb6-7"><a href="#cb6-7" aria-hidden="true" tabindex="-1"></a>    <span class="st">"nodes"</span>,</span>
-<span id="cb6-8"><a href="#cb6-8" aria-hidden="true" tabindex="-1"></a>    nodes_db[</span>
-<span id="cb6-9"><a href="#cb6-9" aria-hidden="true" tabindex="-1"></a>        [</span>
-<span id="cb6-10"><a href="#cb6-10" aria-hidden="true" tabindex="-1"></a>            <span class="st">"iso3"</span>,</span>
-<span id="cb6-11"><a href="#cb6-11" aria-hidden="true" tabindex="-1"></a>            <span class="st">"name"</span>,</span>
-<span id="cb6-12"><a href="#cb6-12" aria-hidden="true" tabindex="-1"></a>            <span class="st">"grp"</span>,</span>
-<span id="cb6-13"><a href="#cb6-13" aria-hidden="true" tabindex="-1"></a>            <span class="st">"out_strength"</span>,</span>
-<span id="cb6-14"><a href="#cb6-14" aria-hidden="true" tabindex="-1"></a>            <span class="st">"in_strength"</span>,</span>
-<span id="cb6-15"><a href="#cb6-15" aria-hidden="true" tabindex="-1"></a>            <span class="st">"degree"</span>,</span>
-<span id="cb6-16"><a href="#cb6-16" aria-hidden="true" tabindex="-1"></a>            <span class="st">"betweenness"</span>,</span>
-<span id="cb6-17"><a href="#cb6-17" aria-hidden="true" tabindex="-1"></a>            <span class="st">"betweenness_u"</span>,</span>
-<span id="cb6-18"><a href="#cb6-18" aria-hidden="true" tabindex="-1"></a>            <span class="st">"eigenvector"</span>,</span>
-<span id="cb6-19"><a href="#cb6-19" aria-hidden="true" tabindex="-1"></a>            <span class="st">"pagerank"</span>,</span>
-<span id="cb6-20"><a href="#cb6-20" aria-hidden="true" tabindex="-1"></a>            <span class="st">"community"</span>,</span>
-<span id="cb6-21"><a href="#cb6-21" aria-hidden="true" tabindex="-1"></a>        ]</span>
-<span id="cb6-22"><a href="#cb6-22" aria-hidden="true" tabindex="-1"></a>    ],</span>
-<span id="cb6-23"><a href="#cb6-23" aria-hidden="true" tabindex="-1"></a>)</span>
-<span id="cb6-24"><a href="#cb6-24" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb6-25"><a href="#cb6-25" aria-hidden="true" tabindex="-1"></a><span class="co"># Keep edges in sync if earlier notebooks have not been run in this environment.</span></span>
-<span id="cb6-26"><a href="#cb6-26" aria-hidden="true" tabindex="-1"></a>edges_db <span class="op">=</span> edgelist.copy()</span>
-<span id="cb6-27"><a href="#cb6-27" aria-hidden="true" tabindex="-1"></a>edges_db[<span class="st">"year"</span>] <span class="op">=</span> config.YEAR</span>
-<span id="cb6-28"><a href="#cb6-28" aria-hidden="true" tabindex="-1"></a>db.write_table(con, <span class="st">"edges"</span>, edges_db[[<span class="st">"exporter_iso3"</span>, <span class="st">"importer_iso3"</span>, <span class="st">"value_kusd"</span>, <span class="st">"year"</span>]])</span>
-<span id="cb6-29"><a href="#cb6-29" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f"Wrote community ids for </span><span class="sc">{</span><span class="bu">len</span>(nodes_db)<span class="sc">}</span><span class="ss"> nodes → </span><span class="sc">{</span>config<span class="sc">.</span>DB_PATH<span class="sc">}</span><span class="ss">"</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb4"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a>nodes_db[<span class="st">"community"</span>] <span class="op">=</span> [<span class="bu">int</span>(partition[i]) <span class="cf">for</span> i <span class="kw">in</span> nodes_db[<span class="st">"iso3"</span>]]</span>
+<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a>con <span class="op">=</span> db.<span class="ex">connect</span>()</span>
+<span id="cb4-4"><a href="#cb4-4" aria-hidden="true" tabindex="-1"></a>db.init_schema(con)</span>
+<span id="cb4-5"><a href="#cb4-5" aria-hidden="true" tabindex="-1"></a>db.write_table(</span>
+<span id="cb4-6"><a href="#cb4-6" aria-hidden="true" tabindex="-1"></a>    con,</span>
+<span id="cb4-7"><a href="#cb4-7" aria-hidden="true" tabindex="-1"></a>    <span class="st">"nodes"</span>,</span>
+<span id="cb4-8"><a href="#cb4-8" aria-hidden="true" tabindex="-1"></a>    nodes_db[</span>
+<span id="cb4-9"><a href="#cb4-9" aria-hidden="true" tabindex="-1"></a>        [</span>
+<span id="cb4-10"><a href="#cb4-10" aria-hidden="true" tabindex="-1"></a>            <span class="st">"iso3"</span>,</span>
+<span id="cb4-11"><a href="#cb4-11" aria-hidden="true" tabindex="-1"></a>            <span class="st">"name"</span>,</span>
+<span id="cb4-12"><a href="#cb4-12" aria-hidden="true" tabindex="-1"></a>            <span class="st">"grp"</span>,</span>
+<span id="cb4-13"><a href="#cb4-13" aria-hidden="true" tabindex="-1"></a>            <span class="st">"out_strength"</span>,</span>
+<span id="cb4-14"><a href="#cb4-14" aria-hidden="true" tabindex="-1"></a>            <span class="st">"in_strength"</span>,</span>
+<span id="cb4-15"><a href="#cb4-15" aria-hidden="true" tabindex="-1"></a>            <span class="st">"degree"</span>,</span>
+<span id="cb4-16"><a href="#cb4-16" aria-hidden="true" tabindex="-1"></a>            <span class="st">"betweenness"</span>,</span>
+<span id="cb4-17"><a href="#cb4-17" aria-hidden="true" tabindex="-1"></a>            <span class="st">"betweenness_u"</span>,</span>
+<span id="cb4-18"><a href="#cb4-18" aria-hidden="true" tabindex="-1"></a>            <span class="st">"eigenvector"</span>,</span>
+<span id="cb4-19"><a href="#cb4-19" aria-hidden="true" tabindex="-1"></a>            <span class="st">"pagerank"</span>,</span>
+<span id="cb4-20"><a href="#cb4-20" aria-hidden="true" tabindex="-1"></a>            <span class="st">"community"</span>,</span>
+<span id="cb4-21"><a href="#cb4-21" aria-hidden="true" tabindex="-1"></a>        ]</span>
+<span id="cb4-22"><a href="#cb4-22" aria-hidden="true" tabindex="-1"></a>    ],</span>
+<span id="cb4-23"><a href="#cb4-23" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb4-24"><a href="#cb4-24" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-25"><a href="#cb4-25" aria-hidden="true" tabindex="-1"></a><span class="co"># Keep edges in sync if earlier notebooks have not been run in this environment.</span></span>
+<span id="cb4-26"><a href="#cb4-26" aria-hidden="true" tabindex="-1"></a>edges_db <span class="op">=</span> edgelist.copy()</span>
+<span id="cb4-27"><a href="#cb4-27" aria-hidden="true" tabindex="-1"></a>edges_db[<span class="st">"year"</span>] <span class="op">=</span> config.YEAR</span>
+<span id="cb4-28"><a href="#cb4-28" aria-hidden="true" tabindex="-1"></a>db.write_table(con, <span class="st">"edges"</span>, edges_db[[<span class="st">"exporter_iso3"</span>, <span class="st">"importer_iso3"</span>, <span class="st">"value_kusd"</span>, <span class="st">"year"</span>]])</span>
+<span id="cb4-29"><a href="#cb4-29" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f"Wrote community ids for </span><span class="sc">{</span><span class="bu">len</span>(nodes_db)<span class="sc">}</span><span class="ss"> nodes → </span><span class="sc">{</span>config<span class="sc">.</span>DB_PATH<span class="sc">}</span><span class="ss">"</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </details>
-<div class="cell-output cell-output-stdout">
-<pre><code>Wrote community ids for 35 nodes → /home/emilia/portfolio/eu-trade-network/data/processed/trade.duckdb</code></pre>
-</div>
 </div>
 </section>
 <section id="community-summary-rq2" class="level2">
 <h2 class="anchored" data-anchor-id="community-summary-rq2">Community summary (RQ2)</h2>
 <p>Size, members, and total exports per community, straight from SQL.</p>
-<div id="9" class="cell" data-quarto-private-1="{&quot;key&quot;:&quot;execution&quot;,&quot;value&quot;:{&quot;iopub.execute_input&quot;:&quot;2026-07-26T15:19:08.781238Z&quot;,&quot;iopub.status.busy&quot;:&quot;2026-07-26T15:19:08.781149Z&quot;,&quot;iopub.status.idle&quot;:&quot;2026-07-26T15:19:08.807910Z&quot;,&quot;shell.execute_reply&quot;:&quot;2026-07-26T15:19:08.807336Z&quot;}}" data-execution_count="5">
+<div id="9" class="cell">
 <details class="code-fold">
 <summary>Show code</summary>
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb8"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a>community_tbl <span class="op">=</span> db.read_sql(con, config.SQL_DIR <span class="op">/</span> <span class="st">"queries"</span> <span class="op">/</span> <span class="st">"02_community_summary.sql"</span>)</span>
-<span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a>community_tbl</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb5"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a>community_tbl <span class="op">=</span> db.read_sql(con, config.SQL_DIR <span class="op">/</span> <span class="st">"queries"</span> <span class="op">/</span> <span class="st">"02_community_summary.sql"</span>)</span>
+<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a>community_tbl</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </details>
-<div class="cell-output cell-output-display" data-execution_count="5">
-<div>
-
-
-<table class="dataframe caption-top table table-sm table-striped small" data-border="1">
-<thead>
-<tr class="header">
-<th data-quarto-table-cell-role="th"></th>
-<th data-quarto-table-cell-role="th">community</th>
-<th data-quarto-table-cell-role="th">n_countries</th>
-<th data-quarto-table-cell-role="th">members</th>
-<th data-quarto-table-cell-role="th">community_exports_busd</th>
-</tr>
-</thead>
-<tbody>
-<tr class="odd">
-<th data-quarto-table-cell-role="th">0</th>
-<td>0</td>
-<td>23</td>
-<td>DEU, NLD, ITA, FRA, BEL, ESP, POL, CHE, CZE, A...</td>
-<td>5237.2</td>
-</tr>
-<tr class="even">
-<th data-quarto-table-cell-role="th">1</th>
-<td>1</td>
-<td>7</td>
-<td>CHN, USA, JPN, RUS, GBR, IRL, TUR</td>
-<td>3894.2</td>
-</tr>
-<tr class="odd">
-<th data-quarto-table-cell-role="th">2</th>
-<td>2</td>
-<td>5</td>
-<td>NOR, SWE, DNK, FIN, EST</td>
-<td>623.5</td>
-</tr>
-</tbody>
-</table>
-
-</div>
-</div>
 </div>
 </section>
 <section id="geographic-map-coloured-by-community" class="level2">
 <h2 class="anchored" data-anchor-id="geographic-map-coloured-by-community">Geographic map coloured by community</h2>
 <p>Nodes at lon/lat, coloured by Louvain community and sized by export strength; faint lines show the backbone so the blocs are readable against geography.</p>
-<div id="11" class="cell" data-quarto-private-1="{&quot;key&quot;:&quot;execution&quot;,&quot;value&quot;:{&quot;iopub.execute_input&quot;:&quot;2026-07-26T15:19:08.808786Z&quot;,&quot;iopub.status.busy&quot;:&quot;2026-07-26T15:19:08.808704Z&quot;,&quot;iopub.status.idle&quot;:&quot;2026-07-26T15:19:09.619309Z&quot;,&quot;shell.execute_reply&quot;:&quot;2026-07-26T15:19:09.618601Z&quot;}}" data-execution_count="6">
+<div id="11" class="cell">
 <details class="code-fold">
 <summary>Show code</summary>
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb9"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a>bb_edges <span class="op">=</span> pd.DataFrame(</span>
-<span id="cb9-2"><a href="#cb9-2" aria-hidden="true" tabindex="-1"></a>    [</span>
-<span id="cb9-3"><a href="#cb9-3" aria-hidden="true" tabindex="-1"></a>        {<span class="st">"exporter_iso3"</span>: u, <span class="st">"importer_iso3"</span>: v, <span class="st">"value_kusd"</span>: <span class="bu">float</span>(d[<span class="st">"weight"</span>])}</span>
-<span id="cb9-4"><a href="#cb9-4" aria-hidden="true" tabindex="-1"></a>        <span class="cf">for</span> u, v, d <span class="kw">in</span> backbone.edges(data<span class="op">=</span><span class="va">True</span>)</span>
-<span id="cb9-5"><a href="#cb9-5" aria-hidden="true" tabindex="-1"></a>    ]</span>
-<span id="cb9-6"><a href="#cb9-6" aria-hidden="true" tabindex="-1"></a>)</span>
-<span id="cb9-7"><a href="#cb9-7" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb9-8"><a href="#cb9-8" aria-hidden="true" tabindex="-1"></a>fig_comm <span class="op">=</span> viz.plot_community_map(</span>
-<span id="cb9-9"><a href="#cb9-9" aria-hidden="true" tabindex="-1"></a>    nodes_db,</span>
-<span id="cb9-10"><a href="#cb9-10" aria-hidden="true" tabindex="-1"></a>    partition,</span>
-<span id="cb9-11"><a href="#cb9-11" aria-hidden="true" tabindex="-1"></a>    edgelist<span class="op">=</span>bb_edges,</span>
-<span id="cb9-12"><a href="#cb9-12" aria-hidden="true" tabindex="-1"></a>    title<span class="op">=</span>(</span>
-<span id="cb9-13"><a href="#cb9-13" aria-hidden="true" tabindex="-1"></a>        <span class="ss">f"European trade communities — Louvain on the </span><span class="sc">{</span>chosen_name<span class="sc">}</span><span class="ss"> "</span></span>
-<span id="cb9-14"><a href="#cb9-14" aria-hidden="true" tabindex="-1"></a>        <span class="ss">f"(K=</span><span class="sc">{</span><span class="bu">len</span>(<span class="bu">set</span>(partition.values()))<span class="sc">}</span><span class="ss">, Q=</span><span class="sc">{</span>chosen_mod<span class="sc">:.3f}</span><span class="ss">)"</span></span>
-<span id="cb9-15"><a href="#cb9-15" aria-hidden="true" tabindex="-1"></a>    ),</span>
-<span id="cb9-16"><a href="#cb9-16" aria-hidden="true" tabindex="-1"></a>)</span>
-<span id="cb9-17"><a href="#cb9-17" aria-hidden="true" tabindex="-1"></a>out <span class="op">=</span> viz.save_fig(fig_comm, <span class="st">"03_community_map.png"</span>, headline<span class="op">=</span><span class="va">True</span>)</span>
-<span id="cb9-18"><a href="#cb9-18" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f"Saved </span><span class="sc">{</span>out<span class="sc">}</span><span class="ss">"</span>)</span>
-<span id="cb9-19"><a href="#cb9-19" aria-hidden="true" tabindex="-1"></a>fig_comm.show()</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb6"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a>bb_edges <span class="op">=</span> pd.DataFrame(</span>
+<span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a>    [</span>
+<span id="cb6-3"><a href="#cb6-3" aria-hidden="true" tabindex="-1"></a>        {<span class="st">"exporter_iso3"</span>: u, <span class="st">"importer_iso3"</span>: v, <span class="st">"value_kusd"</span>: <span class="bu">float</span>(d[<span class="st">"weight"</span>])}</span>
+<span id="cb6-4"><a href="#cb6-4" aria-hidden="true" tabindex="-1"></a>        <span class="cf">for</span> u, v, d <span class="kw">in</span> backbone.edges(data<span class="op">=</span><span class="va">True</span>)</span>
+<span id="cb6-5"><a href="#cb6-5" aria-hidden="true" tabindex="-1"></a>    ]</span>
+<span id="cb6-6"><a href="#cb6-6" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb6-7"><a href="#cb6-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-8"><a href="#cb6-8" aria-hidden="true" tabindex="-1"></a>fig_comm <span class="op">=</span> viz.plot_community_map(</span>
+<span id="cb6-9"><a href="#cb6-9" aria-hidden="true" tabindex="-1"></a>    nodes_db,</span>
+<span id="cb6-10"><a href="#cb6-10" aria-hidden="true" tabindex="-1"></a>    partition,</span>
+<span id="cb6-11"><a href="#cb6-11" aria-hidden="true" tabindex="-1"></a>    edgelist<span class="op">=</span>bb_edges,</span>
+<span id="cb6-12"><a href="#cb6-12" aria-hidden="true" tabindex="-1"></a>    title<span class="op">=</span>(</span>
+<span id="cb6-13"><a href="#cb6-13" aria-hidden="true" tabindex="-1"></a>        <span class="ss">f"European trade communities — Louvain on the </span><span class="sc">{</span>chosen_name<span class="sc">}</span><span class="ss"> "</span></span>
+<span id="cb6-14"><a href="#cb6-14" aria-hidden="true" tabindex="-1"></a>        <span class="ss">f"(K=</span><span class="sc">{</span><span class="bu">len</span>(<span class="bu">set</span>(partition.values()))<span class="sc">}</span><span class="ss">, Q=</span><span class="sc">{</span>chosen_mod<span class="sc">:.3f}</span><span class="ss">)"</span></span>
+<span id="cb6-15"><a href="#cb6-15" aria-hidden="true" tabindex="-1"></a>    ),</span>
+<span id="cb6-16"><a href="#cb6-16" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb6-17"><a href="#cb6-17" aria-hidden="true" tabindex="-1"></a>out <span class="op">=</span> viz.save_fig(fig_comm, <span class="st">"03_community_map.png"</span>, headline<span class="op">=</span><span class="va">True</span>)</span>
+<span id="cb6-18"><a href="#cb6-18" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f"Saved </span><span class="sc">{</span>out<span class="sc">}</span><span class="ss">"</span>)</span>
+<span id="cb6-19"><a href="#cb6-19" aria-hidden="true" tabindex="-1"></a>fig_comm.show()</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </details>
-<div class="cell-output cell-output-stdout">
-<pre><code>Saved /home/emilia/portfolio/eu-trade-network/figures/headline/03_community_map.png</code></pre>
-</div>
-<div class="cell-output cell-output-display">
-<pre><code>Unable to display output for mime type(s): application/vnd.plotly.v1+json</code></pre>
-</div>
 </div>
 </section>
 <section id="interactive-network" class="level2">
 <h2 class="anchored" data-anchor-id="interactive-network">Interactive network</h2>
 <p>Write the PyVis HTML used by the site’s <a href="../network.html">interactive network</a> page (node size ∝ strength, colour = community, edge width ∝ bilateral value). Explore it there rather than here.</p>
-<div id="13" class="cell" data-quarto-private-1="{&quot;key&quot;:&quot;execution&quot;,&quot;value&quot;:{&quot;iopub.execute_input&quot;:&quot;2026-07-26T15:19:09.621015Z&quot;,&quot;iopub.status.busy&quot;:&quot;2026-07-26T15:19:09.620923Z&quot;,&quot;iopub.status.idle&quot;:&quot;2026-07-26T15:19:09.693747Z&quot;,&quot;shell.execute_reply&quot;:&quot;2026-07-26T15:19:09.693121Z&quot;}}" data-execution_count="7">
+<div id="13" class="cell">
 <details class="code-fold">
 <summary>Show code</summary>
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb12"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Short, data-driven legend labels: name each bloc after its largest exporter.</span></span>
-<span id="cb12-2"><a href="#cb12-2" aria-hidden="true" tabindex="-1"></a>strength_by_iso <span class="op">=</span> <span class="bu">dict</span>(<span class="bu">zip</span>(nodes_db[<span class="st">"iso3"</span>], nodes_db[<span class="st">"out_strength"</span>], strict<span class="op">=</span><span class="va">True</span>))</span>
-<span id="cb12-3"><a href="#cb12-3" aria-hidden="true" tabindex="-1"></a>members_by_comm: <span class="bu">dict</span>[<span class="bu">int</span>, <span class="bu">list</span>[<span class="bu">str</span>]] <span class="op">=</span> {}</span>
-<span id="cb12-4"><a href="#cb12-4" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> iso, comm <span class="kw">in</span> partition.items():</span>
-<span id="cb12-5"><a href="#cb12-5" aria-hidden="true" tabindex="-1"></a>    members_by_comm.setdefault(<span class="bu">int</span>(comm), []).append(iso)</span>
-<span id="cb12-6"><a href="#cb12-6" aria-hidden="true" tabindex="-1"></a>community_labels <span class="op">=</span> {</span>
-<span id="cb12-7"><a href="#cb12-7" aria-hidden="true" tabindex="-1"></a>    comm: (</span>
-<span id="cb12-8"><a href="#cb12-8" aria-hidden="true" tabindex="-1"></a>        <span class="ss">f"</span><span class="sc">{</span><span class="bu">max</span>(members, key<span class="op">=</span><span class="kw">lambda</span> i: strength_by_iso.get(i, <span class="fl">0.0</span>))<span class="sc">}</span><span class="ss">-led bloc "</span></span>
-<span id="cb12-9"><a href="#cb12-9" aria-hidden="true" tabindex="-1"></a>        <span class="ss">f"(</span><span class="sc">{</span><span class="bu">len</span>(members)<span class="sc">}</span><span class="ss"> economies)"</span></span>
-<span id="cb12-10"><a href="#cb12-10" aria-hidden="true" tabindex="-1"></a>    )</span>
-<span id="cb12-11"><a href="#cb12-11" aria-hidden="true" tabindex="-1"></a>    <span class="cf">for</span> comm, members <span class="kw">in</span> members_by_comm.items()</span>
-<span id="cb12-12"><a href="#cb12-12" aria-hidden="true" tabindex="-1"></a>}</span>
-<span id="cb12-13"><a href="#cb12-13" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb12-14"><a href="#cb12-14" aria-hidden="true" tabindex="-1"></a>k <span class="op">=</span> <span class="bu">len</span>(<span class="bu">set</span>(partition.values()))</span>
-<span id="cb12-15"><a href="#cb12-15" aria-hidden="true" tabindex="-1"></a>html_path <span class="op">=</span> config.PROJECT_ROOT <span class="op">/</span> <span class="st">"network_viz"</span> <span class="op">/</span> <span class="st">"03_trade_communities.html"</span></span>
-<span id="cb12-16"><a href="#cb12-16" aria-hidden="true" tabindex="-1"></a>viz.plot_network_pyvis(</span>
-<span id="cb12-17"><a href="#cb12-17" aria-hidden="true" tabindex="-1"></a>    undirected,</span>
-<span id="cb12-18"><a href="#cb12-18" aria-hidden="true" tabindex="-1"></a>    partition,</span>
-<span id="cb12-19"><a href="#cb12-19" aria-hidden="true" tabindex="-1"></a>    html_path,</span>
-<span id="cb12-20"><a href="#cb12-20" aria-hidden="true" tabindex="-1"></a>    title<span class="op">=</span><span class="st">"European trade communities"</span>,</span>
-<span id="cb12-21"><a href="#cb12-21" aria-hidden="true" tabindex="-1"></a>    subtitle<span class="op">=</span><span class="ss">f"Weighted Louvain on the </span><span class="sc">{</span>chosen_name<span class="sc">}</span><span class="ss"> · K=</span><span class="sc">{</span>k<span class="sc">}</span><span class="ss"> · modularity Q=</span><span class="sc">{</span>chosen_mod<span class="sc">:.3f}</span><span class="ss">"</span>,</span>
-<span id="cb12-22"><a href="#cb12-22" aria-hidden="true" tabindex="-1"></a>    community_labels<span class="op">=</span>community_labels,</span>
-<span id="cb12-23"><a href="#cb12-23" aria-hidden="true" tabindex="-1"></a>)</span>
-<span id="cb12-24"><a href="#cb12-24" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f"Wrote interactive network → </span><span class="sc">{</span>html_path<span class="sc">}</span><span class="ss">"</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb7"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Short, data-driven legend labels: name each bloc after its largest exporter.</span></span>
+<span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a>strength_by_iso <span class="op">=</span> <span class="bu">dict</span>(<span class="bu">zip</span>(nodes_db[<span class="st">"iso3"</span>], nodes_db[<span class="st">"out_strength"</span>], strict<span class="op">=</span><span class="va">True</span>))</span>
+<span id="cb7-3"><a href="#cb7-3" aria-hidden="true" tabindex="-1"></a>members_by_comm: <span class="bu">dict</span>[<span class="bu">int</span>, <span class="bu">list</span>[<span class="bu">str</span>]] <span class="op">=</span> {}</span>
+<span id="cb7-4"><a href="#cb7-4" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> iso, comm <span class="kw">in</span> partition.items():</span>
+<span id="cb7-5"><a href="#cb7-5" aria-hidden="true" tabindex="-1"></a>    members_by_comm.setdefault(<span class="bu">int</span>(comm), []).append(iso)</span>
+<span id="cb7-6"><a href="#cb7-6" aria-hidden="true" tabindex="-1"></a>community_labels <span class="op">=</span> {</span>
+<span id="cb7-7"><a href="#cb7-7" aria-hidden="true" tabindex="-1"></a>    comm: (</span>
+<span id="cb7-8"><a href="#cb7-8" aria-hidden="true" tabindex="-1"></a>        <span class="ss">f"</span><span class="sc">{</span><span class="bu">max</span>(members, key<span class="op">=</span><span class="kw">lambda</span> i: strength_by_iso.get(i, <span class="fl">0.0</span>))<span class="sc">}</span><span class="ss">-led bloc "</span></span>
+<span id="cb7-9"><a href="#cb7-9" aria-hidden="true" tabindex="-1"></a>        <span class="ss">f"(</span><span class="sc">{</span><span class="bu">len</span>(members)<span class="sc">}</span><span class="ss"> economies)"</span></span>
+<span id="cb7-10"><a href="#cb7-10" aria-hidden="true" tabindex="-1"></a>    )</span>
+<span id="cb7-11"><a href="#cb7-11" aria-hidden="true" tabindex="-1"></a>    <span class="cf">for</span> comm, members <span class="kw">in</span> members_by_comm.items()</span>
+<span id="cb7-12"><a href="#cb7-12" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb7-13"><a href="#cb7-13" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-14"><a href="#cb7-14" aria-hidden="true" tabindex="-1"></a>k <span class="op">=</span> <span class="bu">len</span>(<span class="bu">set</span>(partition.values()))</span>
+<span id="cb7-15"><a href="#cb7-15" aria-hidden="true" tabindex="-1"></a>html_path <span class="op">=</span> config.PROJECT_ROOT <span class="op">/</span> <span class="st">"network_viz"</span> <span class="op">/</span> <span class="st">"03_trade_communities.html"</span></span>
+<span id="cb7-16"><a href="#cb7-16" aria-hidden="true" tabindex="-1"></a>viz.plot_network_pyvis(</span>
+<span id="cb7-17"><a href="#cb7-17" aria-hidden="true" tabindex="-1"></a>    undirected,</span>
+<span id="cb7-18"><a href="#cb7-18" aria-hidden="true" tabindex="-1"></a>    partition,</span>
+<span id="cb7-19"><a href="#cb7-19" aria-hidden="true" tabindex="-1"></a>    html_path,</span>
+<span id="cb7-20"><a href="#cb7-20" aria-hidden="true" tabindex="-1"></a>    title<span class="op">=</span><span class="st">"European trade communities"</span>,</span>
+<span id="cb7-21"><a href="#cb7-21" aria-hidden="true" tabindex="-1"></a>    subtitle<span class="op">=</span><span class="ss">f"Weighted Louvain on the </span><span class="sc">{</span>chosen_name<span class="sc">}</span><span class="ss"> · K=</span><span class="sc">{</span>k<span class="sc">}</span><span class="ss"> · modularity Q=</span><span class="sc">{</span>chosen_mod<span class="sc">:.3f}</span><span class="ss">"</span>,</span>
+<span id="cb7-22"><a href="#cb7-22" aria-hidden="true" tabindex="-1"></a>    community_labels<span class="op">=</span>community_labels,</span>
+<span id="cb7-23"><a href="#cb7-23" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb7-24"><a href="#cb7-24" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f"Wrote interactive network → </span><span class="sc">{</span>html_path<span class="sc">}</span><span class="ss">"</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </details>
-<div class="cell-output cell-output-stdout">
-<pre><code>Wrote interactive network → /home/emilia/portfolio/eu-trade-network/network_viz/03_trade_communities.html</code></pre>
-</div>
 </div>
 </section>
 <section id="do-the-blocs-follow-eu-membership-or-geography" class="level2">
 <h2 class="anchored" data-anchor-id="do-the-blocs-follow-eu-membership-or-geography">Do the blocs follow EU membership or geography?</h2>
 <p>The paragraph below is generated from the chosen partition, so it always matches the run.</p>
-<div id="15" class="cell" data-quarto-private-1="{&quot;key&quot;:&quot;execution&quot;,&quot;value&quot;:{&quot;iopub.execute_input&quot;:&quot;2026-07-26T15:19:09.694835Z&quot;,&quot;iopub.status.busy&quot;:&quot;2026-07-26T15:19:09.694657Z&quot;,&quot;iopub.status.idle&quot;:&quot;2026-07-26T15:19:09.732461Z&quot;,&quot;shell.execute_reply&quot;:&quot;2026-07-26T15:19:09.731813Z&quot;}}" data-execution_count="8">
+<div id="15" class="cell">
 <details class="code-fold">
 <summary>Show code</summary>
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb14"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a>summary_tbl <span class="op">=</span> communities.community_summary(partition, nodes_db, undirected<span class="op">=</span>undirected)</span>
-<span id="cb14-2"><a href="#cb14-2" aria-hidden="true" tabindex="-1"></a>eu_set <span class="op">=</span> <span class="bu">set</span>(config.EU27)</span>
-<span id="cb14-3"><a href="#cb14-3" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb14-4"><a href="#cb14-4" aria-hidden="true" tabindex="-1"></a>blocs <span class="op">=</span> []</span>
-<span id="cb14-5"><a href="#cb14-5" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> _, row <span class="kw">in</span> summary_tbl.iterrows():</span>
-<span id="cb14-6"><a href="#cb14-6" aria-hidden="true" tabindex="-1"></a>    members <span class="op">=</span> row[<span class="st">"members"</span>].split(<span class="st">", "</span>)</span>
-<span id="cb14-7"><a href="#cb14-7" aria-hidden="true" tabindex="-1"></a>    n_eu <span class="op">=</span> <span class="bu">sum</span>(m <span class="kw">in</span> eu_set <span class="cf">for</span> m <span class="kw">in</span> members)</span>
-<span id="cb14-8"><a href="#cb14-8" aria-hidden="true" tabindex="-1"></a>    blocs.append(</span>
-<span id="cb14-9"><a href="#cb14-9" aria-hidden="true" tabindex="-1"></a>        <span class="ss">f"- **Community </span><span class="sc">{</span><span class="bu">int</span>(row[<span class="st">'community'</span>])<span class="sc">}</span><span class="ss">** — </span><span class="sc">{</span><span class="bu">int</span>(row[<span class="st">'n_countries'</span>])<span class="sc">}</span><span class="ss"> economies, "</span></span>
-<span id="cb14-10"><a href="#cb14-10" aria-hidden="true" tabindex="-1"></a>        <span class="ss">f"</span><span class="sc">{</span>n_eu<span class="sc">}</span><span class="ss"> of them EU-27: </span><span class="sc">{</span>row[<span class="st">'members'</span>]<span class="sc">}</span><span class="ss">"</span></span>
-<span id="cb14-11"><a href="#cb14-11" aria-hidden="true" tabindex="-1"></a>    )</span>
-<span id="cb14-12"><a href="#cb14-12" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb14-13"><a href="#cb14-13" aria-hidden="true" tabindex="-1"></a>eu_communities <span class="op">=</span> {partition[c] <span class="cf">for</span> c <span class="kw">in</span> config.EU27 <span class="cf">if</span> c <span class="kw">in</span> partition}</span>
-<span id="cb14-14"><a href="#cb14-14" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb14-15"><a href="#cb14-15" aria-hidden="true" tabindex="-1"></a>verdict <span class="op">=</span> (</span>
-<span id="cb14-16"><a href="#cb14-16" aria-hidden="true" tabindex="-1"></a>    <span class="ss">f"**Modularity Q = </span><span class="sc">{</span>chosen_mod<span class="sc">:.3f}</span><span class="ss">** on the </span><span class="sc">{</span>chosen_name<span class="sc">}</span><span class="ss"> — moderate but real community "</span></span>
-<span id="cb14-17"><a href="#cb14-17" aria-hidden="true" tabindex="-1"></a>    <span class="st">"structure for a densely integrated trade network. The EU-27 does **not** form a single "</span></span>
-<span id="cb14-18"><a href="#cb14-18" aria-hidden="true" tabindex="-1"></a>    <span class="ss">f"bloc: it splits across **</span><span class="sc">{</span><span class="bu">len</span>(eu_communities)<span class="sc">}</span><span class="ss"> communities**. Membership shows through "</span></span>
-<span id="cb14-19"><a href="#cb14-19" aria-hidden="true" tabindex="-1"></a>    <span class="st">"regionally — a large German-anchored continental core plus a Nordic-Baltic cluster — but "</span></span>
-<span id="cb14-20"><a href="#cb14-20" aria-hidden="true" tabindex="-1"></a>    <span class="st">"the partition tracks *geography and trade intensity*, not the EU border: non-members "</span></span>
-<span id="cb14-21"><a href="#cb14-21" aria-hidden="true" tabindex="-1"></a>    <span class="st">"Switzerland and Norway sit inside their neighbouring EU clusters, while EU-member Ireland "</span></span>
-<span id="cb14-22"><a href="#cb14-22" aria-hidden="true" tabindex="-1"></a>    <span class="st">"defects to the extra-European bloc built around the US, China and the UK (its trade is "</span></span>
-<span id="cb14-23"><a href="#cb14-23" aria-hidden="true" tabindex="-1"></a>    <span class="st">"dominated by US-linked pharma/tech). **Blocs are geographic, not political.**"</span></span>
-<span id="cb14-24"><a href="#cb14-24" aria-hidden="true" tabindex="-1"></a>)</span>
-<span id="cb14-25"><a href="#cb14-25" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb14-26"><a href="#cb14-26" aria-hidden="true" tabindex="-1"></a>display(Markdown(<span class="st">"</span><span class="ch">\n</span><span class="st">"</span>.join(blocs) <span class="op">+</span> <span class="st">"</span><span class="ch">\n\n</span><span class="st">"</span> <span class="op">+</span> verdict))</span>
-<span id="cb14-27"><a href="#cb14-27" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb14-28"><a href="#cb14-28" aria-hidden="true" tabindex="-1"></a>con.close()</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb8"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a>summary_tbl <span class="op">=</span> communities.community_summary(partition, nodes_db, undirected<span class="op">=</span>undirected)</span>
+<span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a>eu_set <span class="op">=</span> <span class="bu">set</span>(config.EU27)</span>
+<span id="cb8-3"><a href="#cb8-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-4"><a href="#cb8-4" aria-hidden="true" tabindex="-1"></a>blocs <span class="op">=</span> []</span>
+<span id="cb8-5"><a href="#cb8-5" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> _, row <span class="kw">in</span> summary_tbl.iterrows():</span>
+<span id="cb8-6"><a href="#cb8-6" aria-hidden="true" tabindex="-1"></a>    members <span class="op">=</span> row[<span class="st">"members"</span>].split(<span class="st">", "</span>)</span>
+<span id="cb8-7"><a href="#cb8-7" aria-hidden="true" tabindex="-1"></a>    n_eu <span class="op">=</span> <span class="bu">sum</span>(m <span class="kw">in</span> eu_set <span class="cf">for</span> m <span class="kw">in</span> members)</span>
+<span id="cb8-8"><a href="#cb8-8" aria-hidden="true" tabindex="-1"></a>    blocs.append(</span>
+<span id="cb8-9"><a href="#cb8-9" aria-hidden="true" tabindex="-1"></a>        <span class="ss">f"- **Community </span><span class="sc">{</span><span class="bu">int</span>(row[<span class="st">'community'</span>])<span class="sc">}</span><span class="ss">** — </span><span class="sc">{</span><span class="bu">int</span>(row[<span class="st">'n_countries'</span>])<span class="sc">}</span><span class="ss"> economies, "</span></span>
+<span id="cb8-10"><a href="#cb8-10" aria-hidden="true" tabindex="-1"></a>        <span class="ss">f"</span><span class="sc">{</span>n_eu<span class="sc">}</span><span class="ss"> of them EU-27: </span><span class="sc">{</span>row[<span class="st">'members'</span>]<span class="sc">}</span><span class="ss">"</span></span>
+<span id="cb8-11"><a href="#cb8-11" aria-hidden="true" tabindex="-1"></a>    )</span>
+<span id="cb8-12"><a href="#cb8-12" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-13"><a href="#cb8-13" aria-hidden="true" tabindex="-1"></a>eu_communities <span class="op">=</span> {partition[c] <span class="cf">for</span> c <span class="kw">in</span> config.EU27 <span class="cf">if</span> c <span class="kw">in</span> partition}</span>
+<span id="cb8-14"><a href="#cb8-14" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-15"><a href="#cb8-15" aria-hidden="true" tabindex="-1"></a>verdict <span class="op">=</span> (</span>
+<span id="cb8-16"><a href="#cb8-16" aria-hidden="true" tabindex="-1"></a>    <span class="ss">f"**Modularity Q = </span><span class="sc">{</span>chosen_mod<span class="sc">:.3f}</span><span class="ss">** on the </span><span class="sc">{</span>chosen_name<span class="sc">}</span><span class="ss"> — moderate but real community "</span></span>
+<span id="cb8-17"><a href="#cb8-17" aria-hidden="true" tabindex="-1"></a>    <span class="st">"structure for a densely integrated trade network. The EU-27 does **not** form a single "</span></span>
+<span id="cb8-18"><a href="#cb8-18" aria-hidden="true" tabindex="-1"></a>    <span class="ss">f"bloc: it splits across **</span><span class="sc">{</span><span class="bu">len</span>(eu_communities)<span class="sc">}</span><span class="ss"> communities**. Membership shows through "</span></span>
+<span id="cb8-19"><a href="#cb8-19" aria-hidden="true" tabindex="-1"></a>    <span class="st">"regionally — a large German-anchored continental core plus a Nordic-Baltic cluster — but "</span></span>
+<span id="cb8-20"><a href="#cb8-20" aria-hidden="true" tabindex="-1"></a>    <span class="st">"the partition tracks *geography and trade intensity*, not the EU border: non-members "</span></span>
+<span id="cb8-21"><a href="#cb8-21" aria-hidden="true" tabindex="-1"></a>    <span class="st">"Switzerland and Norway sit inside their neighbouring EU clusters, while EU-member Ireland "</span></span>
+<span id="cb8-22"><a href="#cb8-22" aria-hidden="true" tabindex="-1"></a>    <span class="st">"defects to the extra-European bloc built around the US, China and the UK (its trade is "</span></span>
+<span id="cb8-23"><a href="#cb8-23" aria-hidden="true" tabindex="-1"></a>    <span class="st">"dominated by US-linked pharma/tech). **Blocs are geographic, not political.**"</span></span>
+<span id="cb8-24"><a href="#cb8-24" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb8-25"><a href="#cb8-25" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-26"><a href="#cb8-26" aria-hidden="true" tabindex="-1"></a>display(Markdown(<span class="st">"</span><span class="ch">\n</span><span class="st">"</span>.join(blocs) <span class="op">+</span> <span class="st">"</span><span class="ch">\n\n</span><span class="st">"</span> <span class="op">+</span> verdict))</span>
+<span id="cb8-27"><a href="#cb8-27" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-28"><a href="#cb8-28" aria-hidden="true" tabindex="-1"></a>con.close()</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </details>
-<div class="cell-output cell-output-display cell-output-markdown">
-<ul>
-<li><strong>Community 0</strong> — 23 economies, 22 of them EU-27: DEU, NLD, ITA, FRA, BEL, ESP, POL, CHE, CZE, AUT, HUN, SVK, ROU, PRT, SVN, BGR, LTU, GRC, HRV, LVA, LUX, MLT, CYP</li>
-<li><strong>Community 1</strong> — 7 economies, 1 of them EU-27: CHN, USA, JPN, RUS, GBR, IRL, TUR</li>
-<li><strong>Community 2</strong> — 5 economies, 4 of them EU-27: NOR, SWE, DNK, FIN, EST</li>
-</ul>
-<p><strong>Modularity Q = 0.251</strong> on the backbone — moderate but real community structure for a densely integrated trade network. The EU-27 does <strong>not</strong> form a single bloc: it splits across <strong>3 communities</strong>. Membership shows through regionally — a large German-anchored continental core plus a Nordic-Baltic cluster — but the partition tracks <em>geography and trade intensity</em>, not the EU border: non-members Switzerland and Norway sit inside their neighbouring EU clusters, while EU-member Ireland defects to the extra-European bloc built around the US, China and the UK (its trade is dominated by US-linked pharma/tech). <strong>Blocs are geographic, not political.</strong></p>
-</div>
 </div>
 
 

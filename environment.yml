@@ -10,9 +10,11 @@ dependencies:
   - python-louvain
   - duckdb
   - plotly
-  - python-kaleido<1
   - matplotlib
-  - python-kaleido        # static PNG export for plotly
+  # Static PNG export for plotly. Pinned to v0: kaleido >= 1 drives a system Chrome
+  # (`plotly_get_chrome`), which needs libnss3/libnspr4/libasound2t64 — not present on
+  # a stock Ubuntu WSL image. v0 bundles its own headless Chromium and just works.
+  - python-kaleido<1
   - jupyterlab
   - ipykernel
   - pip

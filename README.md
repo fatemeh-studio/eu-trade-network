@@ -37,11 +37,32 @@ python -m ipykernel install --user --name eu-trade-network
 # one-time BACI download → data/raw/  (see data/README.md)
 jupyter lab   # run notebooks/01 → 05 top-to-bottom
 
-# rebuild / publish the site — always from branch `main`, never from `gh-pages`
-quarto render --execute          # run notebooks (needs BACI); writes `_freeze/`
-# later publishes can reuse the freeze (no re-run):
-#   quarto render && PRE_COMMIT_ALLOW_NO_CONFIG=1 quarto publish gh-pages
+# preview the site locally (replays _freeze/, no notebook run, no BACI needed)
+quarto preview
 ```
+
+## Publishing
+
+**Push to `main`. That is the whole workflow** — [`.github/workflows/publish.yml`](.github/workflows/publish.yml)
+renders the site and pushes it to `gh-pages`, which GitHub Pages serves. Never render or
+commit onto `gh-pages` by hand.
+
+CI does not run the notebooks. It replays `_freeze/`, the committed cache of cell
+outputs, which exists because nbstripout strips outputs out of the `.ipynb` files on
+commit. So `_freeze/` — and `network_viz/`, the PyVis graph built by NB03 — **are
+committed on purpose**; they are the only record of the results.
+
+The one rule that follows: **after changing notebook code or prose, refresh the freeze in
+the same commit.**
+
+```bash
+quarto render --execute                 # re-runs notebooks; needs BACI in data/raw/
+git add _freeze network_viz && git commit -m "refresh freeze"
+```
+
+Forget it and the publish job fails with a missing-kernel error rather than quietly
+serving the old output — `execute.freeze` is set to `auto`, not `true`, precisely so
+that mistake is loud. Editing only `.qmd` prose or `styles/` needs no refresh.
 
 
 ## Project structure
@@ -52,6 +73,8 @@ notebooks/              01 → 05 (rendered as pages on the site)
 data.qmd · index.qmd    Quarto site: Data & method + Home
 data/                   raw/ processed/ (gitignored) · reference/ (committed)
 figures/headline/       committed PNGs
+_freeze/                committed notebook outputs — the site renders from these
+network_viz/            committed PyVis graph, built by NB03
 ```
 
 ## Licence

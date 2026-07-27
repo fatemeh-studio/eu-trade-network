@@ -14,16 +14,16 @@ plan/
 # QA / scratch figures
 figures/qa/
 
-# Generated interactive network HTML (PyVis)
-network_viz/
-
 # Quarto
+# _site/ is the rendered site (CI builds it); .quarto/ is local render scratch.
 /_site/
 /.quarto/
 *_files/
-# Executed-notebook cache: holds cell outputs, so keep it out of git for the same
-# reason notebook outputs are stripped (see .gitattributes / nbstripout).
-/_freeze/
+
+# NOTE: `_freeze/` and `network_viz/` are deliberately COMMITTED (see AGENTS.md /
+# README). nbstripout strips outputs from the .ipynb files, so those two directories
+# are the only record of the notebook results — CI renders the site from them and
+# needs no BACI download. Do not add them here.
 
 # Python
 __pycache__/

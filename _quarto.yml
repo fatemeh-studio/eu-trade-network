@@ -77,8 +77,13 @@ format:
     include-after-body: styles/sidebar-toggles.html
 
 execute:
-  # Use frozen cell outputs from `_freeze/` so `quarto render` / `quarto publish`
-  # keep notebook figures & tables even though .ipynb files are stripped by nbstripout.
-  # Refresh after notebook changes: `quarto render --execute` (needs BACI in data/raw/).
-  freeze: true
+  # Cell outputs come from the committed `_freeze/` cache, so a render needs neither a
+  # Jupyter kernel nor the BACI download — that is what lets CI publish the site even
+  # though nbstripout strips outputs from the .ipynb files.
+  #
+  # `auto`, NOT `true`: `true` reuses a freeze even when the notebook has changed, which
+  # silently publishes stale results. `auto` compares the source hash and re-executes on
+  # a mismatch — in CI (no kernel, no data) that turns a forgotten refresh into a red
+  # build instead of a wrong page. Refresh locally with `quarto render --execute`.
+  freeze: auto
   warning: false

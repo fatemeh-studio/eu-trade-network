@@ -1,3 +1,9 @@
 *.ipynb filter=nbstripout
 *.zpln filter=nbstripout
 *.ipynb diff=ipynb
+
+# Build artefacts that are committed on purpose (they carry the notebook outputs that
+# nbstripout removes). Marked generated so they collapse in PR diffs and are excluded
+# from GitHub's language stats — they are machine-written, never hand-edited.
+_freeze/** linguist-generated=true -diff
+network_viz/** linguist-generated=true -diff

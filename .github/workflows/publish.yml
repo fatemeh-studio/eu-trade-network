@@ -1,0 +1,49 @@
+name: publish
+
+# Renders the Quarto site and pushes it to the `gh-pages` branch, which GitHub Pages
+# already serves. Nothing here executes notebooks: `execute.freeze: auto` in
+# _quarto.yml replays the committed `_freeze/` cache, so no Python, no Jupyter kernel
+# and no BACI download are needed.
+#
+# If a notebook was edited without refreshing its freeze, Quarto tries to execute it,
+# finds no kernel, and this job fails — deliberately. The fix is always the same:
+#   quarto render --execute && git add _freeze network_viz && git commit
+on:
+  push:
+    branches: [main]
+    # Skip the render when a push cannot change the site.
+    paths-ignore:
+      - "README.md"
+      - "LICENSE"
+      - ".github/workflows/ci.yml"
+  workflow_dispatch:
+
+# Only `contents: write` — quarto publish pushes a commit to the gh-pages branch.
+permissions:
+  contents: write
+
+# A second push while a publish is in flight cancels the older one, so gh-pages can
+# never end up with an out-of-order build.
+concurrency:
+  group: publish-gh-pages
+  cancel-in-progress: true
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Quarto
+        uses: quarto-dev/quarto-actions/setup@v2
+        with:
+          # Pinned to the version the committed freeze was produced with. Bump this and
+          # re-run `quarto render --execute` locally in the same commit.
+          version: 1.9.38
+
+      - name: Render and publish to gh-pages
+        uses: quarto-dev/quarto-actions/publish@v2
+        with:
+          target: gh-pages
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

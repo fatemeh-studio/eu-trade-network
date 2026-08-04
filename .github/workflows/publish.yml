@@ -41,18 +41,16 @@ jobs:
           # re-run `quarto render --execute` locally in the same commit.
           version: 1.9.38
 
-      # `quarto publish` makes the gh-pages commit itself. With no identity configured on
-      # the runner it falls back to a placeholder author (`Quarto GHA Workflow Runner
-      # <…@example.com>`), an address that maps to no GitHub account. Set it explicitly so
-      # built-site commits are attributed like every other commit in the repo.
-      - name: Configure the commit identity
-        run: |
-          git config --global user.name "Fatemeh Saghian"
-          git config --global user.email "fatemehsaghian.at@gmail.com"
-
       - name: Render and publish to gh-pages
         uses: quarto-dev/quarto-actions/publish@v2
         with:
           target: gh-pages
+          # The action runs `git config --global user.{name,email}` from these two inputs
+          # immediately before committing, overwriting anything set earlier in the job — so
+          # a preceding `git config` step does nothing. They default to a placeholder
+          # identity (`Quarto GHA Workflow Runner <…@example.com>`) whose address maps to no
+          # GitHub account, leaving built-site commits unattributed. Set them here instead.
+          GITHUB_USERNAME: Fatemeh Saghian
+          GITHUB_EMAIL: fatemehsaghian.at@gmail.com
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
